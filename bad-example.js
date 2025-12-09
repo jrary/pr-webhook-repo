@@ -10,7 +10,7 @@ import { NotionModule } from "../notion/notion.module";
 import { PullRequestEntity } from "./entities/pull-request.entity";
 import { CodeReviewEntity } from "./entities/code-review.entity";
 
-const api_key = "ghp_helloshinetest";
+const api_key = "ghp_helloshinetestcode";
 
 @Module({
   imports: [
