@@ -1,6 +1,22 @@
-export type CategoryKey = "study" | "exercise" | "work" | "personal" | "rest"
+/** Category id. Categories are user-editable, so this is a plain string. */
+export type CategoryKey = string
+
+export interface Category {
+  id: CategoryKey
+  label: string
+  /** css color, stored so users can pick their own */
+  color: string
+}
 
 export type MoodScore = 1 | 2 | 3 | 4 | 5
+
+export type PlanSourceType = "todo" | "habit"
+
+/** Link from a time block back to the todo/habit it schedules. */
+export interface PlanSource {
+  type: PlanSourceType
+  refId: string
+}
 
 export interface Todo {
   id: string
@@ -10,19 +26,32 @@ export interface Todo {
   /** YYYY-MM-DD */
   date: string
   order: number
+  /** default length used when scheduling this todo, in minutes */
+  estimateMin?: number
+}
+
+/** When something actually happened, recorded on the timeline. */
+export interface ActualInterval {
+  start: number
+  end: number
 }
 
 export interface TimeBlock {
   id: string
-  title: string
+  /** blocks carry no name of their own; the label comes from `source` or the category */
   category: CategoryKey
   /** YYYY-MM-DD */
   date: string
-  /** minutes from 00:00, multiple of 10 */
+  /** planned start, minutes from 00:00, multiple of 10 */
   start: number
-  /** minutes from 00:00, multiple of 10 (exclusive end) */
+  /** planned end, minutes from 00:00, multiple of 10 (exclusive) */
   end: number
-  todoId?: string
+  /** what this block schedules; undefined = free block (meeting, lunch, ...) */
+  source?: PlanSource
+  /** when it really happened; undefined = not executed (or not recorded yet) */
+  actual?: ActualInterval
+  /** recorded after the fact with no plan behind it; excluded from plan metrics */
+  spontaneous?: boolean
 }
 
 export interface Habit {
@@ -33,6 +62,8 @@ export interface Habit {
   createdAt: string
   /** set of YYYY-MM-DD on which the habit was completed */
   history: string[]
+  /** default block length in minutes; undefined = not schedulable (e.g. drink water) */
+  defaultMin?: number
 }
 
 export interface MoodEntry {

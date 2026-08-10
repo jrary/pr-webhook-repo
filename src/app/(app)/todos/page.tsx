@@ -1,14 +1,14 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { CATEGORY_LIST } from "@/lib/categories"
 import type { CategoryKey } from "@/lib/types"
-import { usePlannerStore } from "@/lib/store"
+import { useCategories, usePlannerStore } from "@/lib/store"
 import { dateKey } from "@/lib/utils"
 import { useMounted } from "@/hooks/use-mounted"
 import { PageHeader } from "@/components/page-header"
 import { DateNav } from "@/components/date-nav"
 import { AddTodo } from "@/components/features/add-todo"
+import { CategoryManager } from "@/components/features/category-manager"
 import { TodoItem } from "@/components/features/todo-item"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -19,6 +19,7 @@ export default function TodosPage() {
   const [date, setDate] = useState(() => new Date())
   const [filter, setFilter] = useState<CategoryKey | "all">("all")
   const todos = usePlannerStore((s) => s.todos)
+  const categories = useCategories()
 
   const key = dateKey(date)
   const dayTodos = useMemo(
@@ -41,16 +42,25 @@ export default function TodosPage() {
         <CardContent className="space-y-4 p-4 sm:p-6">
           <AddTodo date={key} />
 
-          <Tabs value={filter} onValueChange={(v) => setFilter(v as CategoryKey | "all")}>
-            <TabsList className="flex w-full flex-wrap justify-start">
-              <TabsTrigger value="all">전체</TabsTrigger>
-              {CATEGORY_LIST.map((c) => (
-                <TabsTrigger key={c.key} value={c.key}>
-                  {c.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <Tabs value={filter} onValueChange={(v) => setFilter(v as CategoryKey | "all")}>
+              <TabsList className="flex flex-wrap justify-start">
+                <TabsTrigger value="all">전체</TabsTrigger>
+                {categories.map((c) => (
+                  <TabsTrigger key={c.id} value={c.id}>
+                    <span className="flex items-center gap-1.5">
+                      <span
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{ backgroundColor: c.color }}
+                      />
+                      {c.label}
+                    </span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+            <CategoryManager />
+          </div>
 
           {!mounted ? (
             <div className="space-y-2">

@@ -3,7 +3,7 @@
 import { usePlannerStore } from "@/lib/store"
 import { useMounted } from "@/hooks/use-mounted"
 import { PageHeader } from "@/components/page-header"
-import { AddHabit } from "@/components/features/add-habit"
+import { AddHabitButton } from "@/components/features/habit-dialog"
 import { HabitCard } from "@/components/features/habit-card"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -15,7 +15,7 @@ export default function HabitsPage() {
   return (
     <div>
       <PageHeader title="습관" en="Habits" description="매일의 작은 실천을 추적하세요">
-        <AddHabit />
+        <AddHabitButton />
       </PageHeader>
 
       {!mounted ? (

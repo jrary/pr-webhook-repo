@@ -2,9 +2,8 @@
 
 import { useState } from "react"
 import { Plus } from "lucide-react"
-import { CATEGORY_LIST } from "@/lib/categories"
 import type { CategoryKey } from "@/lib/types"
-import { usePlannerStore } from "@/lib/store"
+import { useCategories, usePlannerStore } from "@/lib/store"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -17,14 +16,18 @@ import {
 
 export function AddTodo({ date }: { date: string }) {
   const addTodo = usePlannerStore((s) => s.addTodo)
+  const categories = useCategories()
   const [title, setTitle] = useState("")
-  const [category, setCategory] = useState<CategoryKey>("study")
+  const [category, setCategory] = useState<CategoryKey>("")
+
+  // stay valid when the selected category is renamed away or deleted
+  const selected = categories.some((c) => c.id === category) ? category : categories[0]?.id ?? ""
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
     const trimmed = title.trim()
-    if (!trimmed) return
-    addTodo({ title: trimmed, category, date })
+    if (!trimmed || !selected) return
+    addTodo({ title: trimmed, category: selected, date })
     setTitle("")
   }
 
@@ -37,14 +40,17 @@ export function AddTodo({ date }: { date: string }) {
         className="flex-1"
       />
       <div className="flex gap-2">
-        <Select value={category} onValueChange={(v) => setCategory(v as CategoryKey)}>
+        <Select value={selected} onValueChange={setCategory}>
           <SelectTrigger className="w-28">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {CATEGORY_LIST.map((c) => (
-              <SelectItem key={c.key} value={c.key}>
-                {c.label}
+            {categories.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                <span className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
+                  {c.label}
+                </span>
               </SelectItem>
             ))}
           </SelectContent>

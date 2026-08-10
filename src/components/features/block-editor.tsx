@@ -1,166 +1,344 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Trash2 } from "lucide-react"
-import { CATEGORY_LIST } from "@/lib/categories"
-import type { CategoryKey, TimeBlock } from "@/lib/types"
-import { usePlannerStore } from "@/lib/store"
-import { minutesToLabel } from "@/lib/date"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useEffect, useState } from "react";
+import { Trash2 } from "lucide-react";
+import type { ActualInterval, CategoryKey, PlanSource } from "@/lib/types";
+import { useCategories, usePlannerStore } from "@/lib/store";
+import { minutesToLabel } from "@/lib/date";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/components/ui/popover";
 
 export interface BlockDraft {
-  id?: string
-  date: string
-  start: number
-  end: number
-  title?: string
-  category?: CategoryKey
+  id?: string;
+  date: string;
+  start: number;
+  end: number;
+  category?: CategoryKey;
+  source?: PlanSource;
+  actual?: ActualInterval;
+  spontaneous?: boolean;
+  /** viewport point the popover opens next to */
+  anchor?: { x: number; y: number };
 }
 
-const STEP = 10
-const TIME_OPTIONS = Array.from({ length: (24 * 60) / STEP + 1 }, (_, i) => i * STEP)
+const STEP = 10;
+const TIME_OPTIONS = Array.from(
+  { length: (24 * 60) / STEP + 1 },
+  (_, i) => i * STEP,
+);
+
+const FREE = "free";
+
+function sourceValue(source?: PlanSource) {
+  return source ? `${source.type}:${source.refId}` : FREE;
+}
+
+function parseSourceValue(value: string): PlanSource | undefined {
+  if (value === FREE) return undefined;
+  const [type, refId] = value.split(":");
+  return { type: type as PlanSource["type"], refId };
+}
+
+function TimeRange({
+  start,
+  end,
+  onChange,
+}: {
+  start: number;
+  end: number;
+  onChange: (start: number, end: number) => void;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <Select
+        value={String(start)}
+        onValueChange={(v) =>
+          onChange(Number(v), Math.max(end, Number(v) + STEP))
+        }
+      >
+        <SelectTrigger className="h-8">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="max-h-60">
+          {TIME_OPTIONS.slice(0, -1).map((m) => (
+            <SelectItem key={m} value={String(m)}>
+              {minutesToLabel(m)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        value={String(end)}
+        onValueChange={(v) => onChange(start, Number(v))}
+      >
+        <SelectTrigger className="h-8">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="max-h-60">
+          {TIME_OPTIONS.filter((m) => m > start).map((m) => (
+            <SelectItem key={m} value={String(m)}>
+              {minutesToLabel(m)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
 
 export function BlockEditor({
   draft,
   onClose,
 }: {
-  draft: BlockDraft | null
-  onClose: () => void
+  draft: BlockDraft | null;
+  onClose: () => void;
 }) {
-  const addBlock = usePlannerStore((s) => s.addBlock)
-  const updateBlock = usePlannerStore((s) => s.updateBlock)
-  const removeBlock = usePlannerStore((s) => s.removeBlock)
+  const addBlock = usePlannerStore((s) => s.addBlock);
+  const updateBlock = usePlannerStore((s) => s.updateBlock);
+  const removeBlock = usePlannerStore((s) => s.removeBlock);
 
-  const [title, setTitle] = useState("")
-  const [category, setCategory] = useState<CategoryKey>("study")
-  const [start, setStart] = useState(0)
-  const [end, setEnd] = useState(STEP)
+  const todos = usePlannerStore((s) => s.todos);
+  const habits = usePlannerStore((s) => s.habits);
+  const categories = useCategories();
+
+  const [category, setCategory] = useState<CategoryKey>("");
+  const [start, setStart] = useState(0);
+  const [end, setEnd] = useState(STEP);
+  const [source, setSource] = useState<string>(FREE);
+  const [actual, setActual] = useState<{ start: number; end: number } | null>(
+    null,
+  );
+  const [unplanned, setUnplanned] = useState(false);
 
   useEffect(() => {
-    if (!draft) return
-    setTitle(draft.title ?? "")
-    setCategory(draft.category ?? "study")
-    setStart(draft.start)
-    setEnd(draft.end)
-  }, [draft])
+    if (!draft) return;
+    setCategory(draft.category ?? categories[0]?.id ?? "");
+    setStart(draft.start);
+    setEnd(draft.end);
+    setSource(sourceValue(draft.source));
+    setUnplanned(draft.spontaneous ?? false);
+    setActual(draft.actual ? { ...draft.actual } : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft]);
 
-  const isEdit = Boolean(draft?.id)
+  const isEdit = Boolean(draft?.id);
+  const dayTodos = todos.filter((t) => t.date === draft?.date);
+
+  function handleSourceChange(value: string) {
+    setSource(value);
+    const parsed = parseSourceValue(value);
+    if (!parsed) return;
+    // adopt the source's category so colours never drift from the item
+    if (parsed.type === "todo") {
+      const todo = todos.find((t) => t.id === parsed.refId);
+      if (todo) setCategory(todo.category);
+      return;
+    }
+    const habit = habits.find((h) => h.id === parsed.refId);
+    if (habit) setCategory(habit.color);
+  }
+
+  /** Turning "planned" off makes the block its own record: plan span = actual span. */
+  function handleUnplannedChange(next: boolean) {
+    setUnplanned(next);
+    if (next) setActual({ start, end });
+  }
 
   function save() {
-    if (!draft) return
-    const s = Math.min(start, end - STEP)
-    const e = Math.max(end, s + STEP)
-    const finalTitle = title.trim() || "(제목 없음)"
-    if (draft.id) {
-      updateBlock(draft.id, { title: finalTitle, category, start: s, end: e })
-    } else {
-      addBlock({ date: draft.date, title: finalTitle, category, start: s, end: e })
-    }
-    onClose()
+    if (!draft) return;
+    const s = Math.min(start, end - STEP);
+    const e = Math.max(end, s + STEP);
+    const finalActual = unplanned
+      ? { start: s, end: e }
+      : (actual ?? undefined);
+    const patch = {
+      category,
+      start: s,
+      end: e,
+      source: parseSourceValue(source),
+      actual: finalActual,
+      spontaneous: unplanned || undefined,
+    };
+    if (draft.id) updateBlock(draft.id, patch);
+    else addBlock({ date: draft.date, ...patch });
+    onClose();
   }
 
   function handleDelete() {
-    if (draft?.id) removeBlock(draft.id)
-    onClose()
+    if (draft?.id) removeBlock(draft.id);
+    onClose();
   }
 
+  // nothing is rendered while closed, so no stray anchor sits at the corner
+  if (!draft) return null
+
   return (
-    <Sheet open={Boolean(draft)} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>{isEdit ? "타임블록 편집" : "타임블록 추가"}</SheetTitle>
-        </SheetHeader>
-
-        <div className="mt-6 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="block-title">제목</Label>
-            <Input
-              id="block-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="무엇을 할 계획인가요?"
-              autoFocus
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>카테고리</Label>
-            <Select value={category} onValueChange={(v) => setCategory(v as CategoryKey)}>
-              <SelectTrigger>
+    <Popover open onOpenChange={(open) => !open && onClose()}>
+      <PopoverAnchor asChild>
+        <div
+          className="pointer-events-none fixed h-1 w-1"
+          style={{ left: draft.anchor?.x ?? 0, top: draft.anchor?.y ?? 0 }}
+        />
+      </PopoverAnchor>
+      <PopoverContent
+        side="right"
+        align="start"
+        collisionPadding={12}
+        className="w-72 p-3"
+        // keeping focus put stops the timeline from being scrolled into view
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">연결</Label>
+            <Select value={source} onValueChange={handleSourceChange}>
+              <SelectTrigger className="h-8">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                {CATEGORY_LIST.map((c) => (
-                  <SelectItem key={c.key} value={c.key}>
-                    {c.label}
+              <SelectContent className="max-h-60">
+                <SelectItem value={FREE}>연결 없음</SelectItem>
+                {dayTodos.map((t) => (
+                  <SelectItem key={t.id} value={`todo:${t.id}`}>
+                    📌 {t.title}
+                  </SelectItem>
+                ))}
+                {habits.map((h) => (
+                  <SelectItem key={h.id} value={`habit:${h.id}`}>
+                    🔁 {h.emoji} {h.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>시작</Label>
-              <Select value={String(start)} onValueChange={(v) => setStart(Number(v))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {TIME_OPTIONS.slice(0, -1).map((m) => (
-                    <SelectItem key={m} value={String(m)}>
-                      {minutesToLabel(m)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">카테고리</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {categories.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    <span className="flex items-center gap-2">
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: c.color }}
+                      />
+                      {c.label}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* plan: the toggle lives here because it decides whether a plan exists at all */}
+          <div className="space-y-2 border-t pt-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs text-muted-foreground">계획 시간</Label>
+              <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
+                계획 없이 한 일
+                <Switch
+                  checked={unplanned}
+                  onCheckedChange={handleUnplannedChange}
+                />
+              </label>
             </div>
-            <div className="space-y-2">
-              <Label>종료</Label>
-              <Select value={String(end)} onValueChange={(v) => setEnd(Number(v))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {TIME_OPTIONS.slice(1).map((m) => (
-                    <SelectItem key={m} value={String(m)}>
-                      {minutesToLabel(m)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {!unplanned && (
+              <TimeRange
+                start={start}
+                end={end}
+                onChange={(s, e) => {
+                  setStart(s);
+                  setEnd(e);
+                }}
+              />
+            )}
+          </div>
+
+          <div className="space-y-2 border-t pt-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs text-muted-foreground">실제 시간</Label>
+              {!unplanned ? (
+                <div className="flex gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => setActual({ start, end })}
+                  >
+                    계획과 동일
+                  </Button>
+                  {actual ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs text-destructive"
+                      onClick={() => setActual(null)}
+                    >
+                      지우기
+                    </Button>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
+            {unplanned ? (
+              <TimeRange
+                start={start}
+                end={end}
+                onChange={(s, e) => {
+                  setStart(s);
+                  setEnd(e);
+                  setActual({ start: s, end: e });
+                }}
+              />
+            ) : actual ? (
+              <TimeRange
+                start={actual.start}
+                end={actual.end}
+                onChange={(s, e) => setActual({ start: s, end: e })}
+              />
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                아직 기록 없음. 블록의 체크 버튼을 누르면 기록이 시작됩니다.
+              </p>
+            )}
+          </div>
+
+          <div className="flex gap-2 border-t pt-3">
+            {isEdit ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDelete}
+                className="text-destructive"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                삭제
+              </Button>
+            ) : null}
+            <Button size="sm" onClick={save} className="flex-1">
+              저장
+            </Button>
           </div>
         </div>
-
-        <SheetFooter className="mt-8 flex-row gap-2">
-          {isEdit ? (
-            <Button variant="outline" onClick={handleDelete} className="text-destructive">
-              <Trash2 className="h-4 w-4" />
-              삭제
-            </Button>
-          ) : null}
-          <Button onClick={save} className="flex-1">
-            저장
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  )
+      </PopoverContent>
+    </Popover>
+  );
 }

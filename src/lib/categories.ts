@@ -1,20 +1,32 @@
-import type { CategoryKey, MoodScore } from "./types"
+import type { Category, MoodScore } from "./types"
 
-export interface CategoryMeta {
-  key: CategoryKey
-  label: string
-  color: string
+/** Seed categories; users can add/rename/recolor/remove them from the todo page. */
+export const DEFAULT_CATEGORIES: Category[] = [
+  { id: "study", label: "공부", color: "#6f8caf" },
+  { id: "exercise", label: "운동", color: "#7ba05b" },
+  { id: "work", label: "업무", color: "#c39a4c" },
+  { id: "personal", label: "개인", color: "#9a82b5" },
+  { id: "rest", label: "휴식", color: "#c98ba0" },
+]
+
+/** Palette offered when creating or editing a category. */
+export const CATEGORY_COLORS = [
+  "#6f8caf",
+  "#7ba05b",
+  "#c39a4c",
+  "#9a82b5",
+  "#c98ba0",
+  "#5c9ea3",
+  "#cf6b5e",
+  "#8a8f98",
+]
+
+/** Stand-in for a category that was deleted while items still referenced it. */
+export const UNKNOWN_CATEGORY: Category = { id: "unknown", label: "미분류", color: "#8a8f98" }
+
+export function findCategory(categories: Category[], id: string): Category {
+  return categories.find((c) => c.id === id) ?? { ...UNKNOWN_CATEGORY, id }
 }
-
-export const CATEGORIES: Record<CategoryKey, CategoryMeta> = {
-  study: { key: "study", label: "공부", color: "var(--category-study)" },
-  exercise: { key: "exercise", label: "운동", color: "var(--category-exercise)" },
-  work: { key: "work", label: "업무", color: "var(--category-work)" },
-  personal: { key: "personal", label: "개인", color: "var(--category-personal)" },
-  rest: { key: "rest", label: "휴식", color: "var(--category-rest)" },
-}
-
-export const CATEGORY_LIST = Object.values(CATEGORIES)
 
 export interface MoodMeta {
   score: MoodScore

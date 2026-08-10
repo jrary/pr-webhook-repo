@@ -17,7 +17,7 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "대시보드", icon: LayoutDashboard },
+  { href: "/", label: "오늘", icon: LayoutDashboard },
   { href: "/todos", label: "할 일", icon: CheckSquare },
   { href: "/planner", label: "시간 계획", icon: CalendarClock },
   { href: "/habits", label: "습관", icon: Repeat },

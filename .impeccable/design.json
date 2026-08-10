@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-10T15:30:00+09:00",
+  "title": "Design System: d-log",
+  "extensions": {
+    "colorMeta": {
+      "sage-olive": {
+        "role": "primary",
+        "displayName": "Sage Olive",
+        "canonical": "hsl(72, 13%, 39%)",
+        "tonalRamp": [
+          "hsl(72, 13%, 15%)",
+          "hsl(72, 13%, 25%)",
+          "hsl(72, 13%, 35%)",
+          "hsl(72, 13%, 39%)",
+          "hsl(72, 13%, 50%)",
+          "hsl(72, 13%, 65%)",
+          "hsl(72, 13%, 80%)",
+          "hsl(72, 13%, 92%)"
+        ]
+      },
+      "warm-cream": {
+        "role": "neutral",
+        "displayName": "Warm Cream",
+        "canonical": "hsl(48, 29%, 94%)",
+        "tonalRamp": [
+          "hsl(48, 29%, 15%)",
+          "hsl(48, 29%, 30%)",
+          "hsl(48, 29%, 45%)",
+          "hsl(48, 29%, 60%)",
+          "hsl(48, 29%, 75%)",
+          "hsl(48, 29%, 85%)",
+          "hsl(48, 29%, 94%)",
+          "hsl(48, 29%, 98%)"
+        ]
+      },
+      "soft-paper": {
+        "role": "neutral",
+        "displayName": "Soft Paper",
+        "canonical": "hsl(46, 40%, 98%)",
+        "tonalRamp": [
+          "hsl(46, 40%, 15%)",
+          "hsl(46, 40%, 30%)",
+          "hsl(46, 40%, 50%)",
+          "hsl(46, 40%, 65%)",
+          "hsl(46, 40%, 80%)",
+          "hsl(46, 40%, 90%)",
+          "hsl(46, 40%, 95%)",
+          "hsl(46, 40%, 98%)"
+        ]
+      },
+      "warm-sand": {
+        "role": "secondary",
+        "displayName": "Warm Sand",
+        "canonical": "hsl(45, 22%, 89%)",
+        "tonalRamp": [
+          "hsl(45, 22%, 15%)",
+          "hsl(45, 22%, 30%)",
+          "hsl(45, 22%, 45%)",
+          "hsl(45, 22%, 60%)",
+          "hsl(45, 22%, 75%)",
+          "hsl(45, 22%, 85%)",
+          "hsl(45, 22%, 89%)",
+          "hsl(45, 22%, 95%)"
+        ]
+      },
+      "deep-soil": {
+        "role": "neutral",
+        "displayName": "Deep Soil",
+        "canonical": "hsl(40, 13%, 19%)",
+        "tonalRamp": [
+          "hsl(40, 13%, 10%)",
+          "hsl(40, 13%, 19%)",
+          "hsl(40, 13%, 30%)",
+          "hsl(40, 13%, 45%)",
+          "hsl(40, 13%, 60%)",
+          "hsl(40, 13%, 75%)",
+          "hsl(40, 13%, 88%)",
+          "hsl(40, 13%, 95%)"
+        ]
+      },
+      "coral-warning": {
+        "role": "tertiary",
+        "displayName": "Coral Warning",
+        "canonical": "hsl(4, 55%, 51%)",
+        "tonalRamp": [
+          "hsl(4, 55%, 20%)",
+          "hsl(4, 55%, 30%)",
+          "hsl(4, 55%, 40%)",
+          "hsl(4, 55%, 51%)",
+          "hsl(4, 55%, 62%)",
+          "hsl(4, 55%, 75%)",
+          "hsl(4, 55%, 88%)",
+          "hsl(4, 55%, 95%)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "브랜드 로고, 대시보드 인사말. 항상 Lora italic."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "본문 텍스트, 설명, 입력 필드. Inter regular."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "버튼 라벨, 탭, 칩, 메타데이터. Inter medium."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "0 1px 2px rgba(60,55,40,0.04)",
+        "purpose": "카드 기본 상태. 미세한 깊이감."
+      },
+      {
+        "name": "popover",
+        "value": "0 4px 12px rgba(60,55,40,0.08)",
+        "purpose": "드롭다운, 팝오버, 모달."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-sidebar",
+        "value": "200ms ease-in-out",
+        "purpose": "사이드바 펼침/접힘 전환."
+      },
+      {
+        "name": "ease-accordion",
+        "value": "0.2s ease-out",
+        "purpose": "아코디언 펼침/접힘."
+      }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "768px" },
+      { "name": "2xl", "value": "1400px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "주요 액션 버튼. Sage Olive pill 스타일.",
+      "html": "<button class=\"ds-btn-primary\">저장하기</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; border-radius: 9999px; font-size: 14px; font-weight: 500; font-family: Inter, system-ui, sans-serif; background: hsl(72, 13%, 39%); color: hsl(46, 40%, 98%); height: 40px; padding: 0 20px; border: none; cursor: pointer; transition: background 0.15s, opacity 0.15s; } .ds-btn-primary:hover { background: hsl(72, 13%, 35%); } .ds-btn-primary:focus-visible { outline: 2px solid hsl(72, 13%, 39%); outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; pointer-events: none; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "보조 액션 버튼. Warm Sand 배경.",
+      "html": "<button class=\"ds-btn-secondary\">취소</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; border-radius: 9999px; font-size: 14px; font-weight: 500; font-family: Inter, system-ui, sans-serif; background: hsl(45, 22%, 89%); color: hsl(40, 13%, 24%); height: 40px; padding: 0 20px; border: none; cursor: pointer; transition: background 0.15s; } .ds-btn-secondary:hover { background: hsl(45, 22%, 82%); } .ds-btn-secondary:focus-visible { outline: 2px solid hsl(72, 13%, 39%); outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "투명 배경 버튼. 아이콘 버튼에 주로 사용.",
+      "html": "<button class=\"ds-btn-ghost\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 5v14M5 12h14\"/></svg></button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px; font-size: 14px; font-weight: 500; font-family: Inter, system-ui, sans-serif; background: transparent; color: hsl(40, 8%, 44%); height: 40px; width: 40px; padding: 0; border: none; cursor: pointer; transition: background 0.15s, color 0.15s; } .ds-btn-ghost:hover { background: hsl(46, 24%, 87%); color: hsl(40, 13%, 19%); } .ds-btn-ghost:focus-visible { outline: 2px solid hsl(72, 13%, 39%); outline-offset: 2px; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "콘텐츠 컨테이너. 종이 노트 한 장 같은 느낌.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-header\"><h3 class=\"ds-card-title\">오늘의 할 일</h3></div><div class=\"ds-card-content\"><p>카드 내용이 여기에 표시됩니다.</p></div></div>",
+      "css": ".ds-card { border-radius: 16px; border: 1px solid hsl(42, 18%, 84%); background: hsl(46, 40%, 98%); color: hsl(40, 13%, 19%); box-shadow: 0 1px 2px rgba(60,55,40,0.04); } .ds-card-header { display: flex; flex-direction: column; gap: 6px; padding: 24px; } .ds-card-title { font-weight: 600; line-height: 1; letter-spacing: -0.01em; margin: 0; font-family: Inter, system-ui, sans-serif; font-size: 16px; } .ds-card-content { padding: 0 24px 24px 24px; font-family: Inter, system-ui, sans-serif; font-size: 14px; line-height: 1.5; }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "텍스트 입력 필드.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"할 일을 입력하세요\" />",
+      "css": ".ds-input { display: flex; height: 40px; width: 100%; border-radius: 14px; border: 1px solid hsl(42, 18%, 84%); background: hsl(48, 29%, 94%); padding: 8px 12px; font-size: 14px; font-family: Inter, system-ui, sans-serif; color: hsl(40, 13%, 19%); transition: border-color 0.15s, box-shadow 0.15s; } .ds-input::placeholder { color: hsl(40, 8%, 44%); } .ds-input:focus { outline: none; border-color: hsl(72, 13%, 39%); box-shadow: 0 0 0 2px hsl(72, 13%, 39% / 0.2); } .ds-input:disabled { cursor: not-allowed; opacity: 0.5; }"
+    },
+    {
+      "name": "Checkbox",
+      "kind": "input",
+      "refersTo": "checkbox",
+      "description": "체크박스. 완료 상태에 Primary 색상.",
+      "html": "<label class=\"ds-checkbox-wrap\"><input type=\"checkbox\" class=\"ds-checkbox\" checked /><span class=\"ds-checkbox-box\"><svg class=\"ds-checkbox-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"><path d=\"M20 6L9 17l-5-5\"/></svg></span></label>",
+      "css": ".ds-checkbox-wrap { display: inline-flex; align-items: center; cursor: pointer; } .ds-checkbox { position: absolute; opacity: 0; width: 0; height: 0; } .ds-checkbox-box { width: 20px; height: 20px; border-radius: 6px; border: 1px solid hsl(72, 13%, 39%); background: transparent; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; } .ds-checkbox:checked + .ds-checkbox-box { background: hsl(72, 13%, 39%); border-color: hsl(72, 13%, 39%); } .ds-checkbox-icon { width: 14px; height: 14px; stroke: hsl(46, 40%, 98%); opacity: 0; transition: opacity 0.1s; } .ds-checkbox:checked + .ds-checkbox-box .ds-checkbox-icon { opacity: 1; } .ds-checkbox:focus-visible + .ds-checkbox-box { outline: 2px solid hsl(72, 13%, 39%); outline-offset: 2px; }"
+    },
+    {
+      "name": "Nav Link Active",
+      "kind": "nav",
+      "refersTo": "nav-active",
+      "description": "사이드바 활성 링크.",
+      "html": "<a href=\"#\" class=\"ds-nav-link ds-nav-active\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\"/></svg><span>대시보드</span></a>",
+      "css": ".ds-nav-link { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; font-family: Inter, system-ui, sans-serif; text-decoration: none; color: hsl(40, 8%, 44%); transition: background 0.15s, color 0.15s; } .ds-nav-link:hover { background: hsl(46, 24%, 87%); color: hsl(40, 13%, 19%); } .ds-nav-active { background: hsl(72, 13%, 39%); color: hsl(46, 40%, 98%); } .ds-nav-active:hover { background: hsl(72, 13%, 35%); color: hsl(46, 40%, 98%); }"
+    },
+    {
+      "name": "Summary Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "대시보드 요약 칩. 아이콘 + 텍스트.",
+      "html": "<span class=\"ds-chip\"><svg class=\"ds-chip-icon\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"/><path d=\"M22 4L12 14.01l-3-3\"/></svg>할 일 3/5</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 9999px; border: 1px solid hsl(42, 18%, 84%); background: hsl(46, 40%, 98%); padding: 4px 12px; font-size: 12px; font-weight: 500; font-family: Inter, system-ui, sans-serif; color: hsl(40, 8%, 44%); } .ds-chip-icon { color: hsl(72, 13%, 39%); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Recording Notebook",
+    "overview": "d-log는 필기하듯 가볍고 실용적인 기록 도구다. 노트북을 펼쳤을 때의 부담 없는 느낌 — 거창한 셋업 없이 바로 쓸 수 있는 도구, 그러나 매일 들여다보고 싶은 따뜻함이 있어야 한다.\n\n시각적 언어는 차분하고 자연스럽다. 크림색 종이 위에 올리브 그린 잉크로 적은 듯한 색감, 둥글지만 과하지 않은 모서리, 미세한 그림자로 레이어를 구분하는 플랫 스타일. 화려한 애니메이션보다 안정적인 전환을 선호하고, 데이터 입력의 마찰을 최소화하는 것이 첫 번째 원칙이다.\n\n한국어 인터페이스에 최적화되어 있으며, 세리프(Lora)와 산세리프(Inter)의 대비로 브랜드 개성과 실용성을 동시에 달성한다.",
+    "keyCharacteristics": [
+      "따뜻한 자연 팔레트 (크림, 세이지, 모래색)",
+      "필기구적 세리프 악센트",
+      "플랫 + 미세 그림자 깊이",
+      "빠른 입력 우선의 인터랙션",
+      "부드러운 모서리 (pill 버튼, 라운드 카드)"
+    ],
+    "rules": [
+      { "name": "The Sage Voice Rule", "body": "Primary accent(Sage Olive)는 액션과 상태 표시에만 사용한다. 배경이나 장식에 쓰지 않는다.", "section": "colors" },
+      { "name": "The Warm Ground Rule", "body": "배경은 항상 따뜻한 크림 계열. 차가운 회색이나 순수 흰색은 사용하지 않는다.", "section": "colors" },
+      { "name": "The Italic Identity Rule", "body": "이탤릭은 Lora에서만 사용한다. Inter는 항상 upright.", "section": "typography" },
+      { "name": "The Small Caps Rule", "body": "브랜드 서브타이틀(\"Daily Record\")은 10px uppercase + 0.18em letter-spacing으로 처리.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "요소는 기본적으로 플랫. 그림자는 레이어 구분이 필요할 때만 사용.", "section": "elevation" }
+    ],
+    "dos": [
+      "새 화면을 만들 때 기존 카드 그리드 패턴(md:grid-cols-2, gap-4)을 따르라.",
+      "모든 인터랙티브 요소에 focus-visible ring을 적용하라.",
+      "한국어 라벨을 우선하되, 서브타이틀은 영문 대문자로 브랜드 악센트를 줘라.",
+      "카테고리 색상을 사용할 때 같은 채도로 유지하라.",
+      "세리프(Lora)는 브랜드 아이덴티티에만 사용하라: 로고, 대시보드 인사말."
+    ],
+    "donts": [
+      "순수 흰색(#fff)이나 순수 검정(#000)을 사용하지 마라. 항상 warm tint.",
+      "날카로운 직각(border-radius: 0)을 사용하지 마라.",
+      "Primary 색상을 큰 배경 영역에 쓰지 마라. 액션과 상태 표시에만.",
+      "과도한 그림자를 사용하지 마라. 미세한 그림자만.",
+      "Inter에 이탤릭을 적용하지 마라."
+    ]
+  }
+}
