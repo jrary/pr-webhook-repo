@@ -31,8 +31,8 @@ export interface DeleteTodoRequest {
 }
 
 export interface GetTodosRequest {
-    from: string;
-    to: string;
+    from?: string;
+    to?: string;
 }
 
 export interface UpdateTodoOperationRequest {
@@ -131,23 +131,9 @@ export class TodoApi extends runtime.BaseAPI {
     }
 
     /**
-     * 할일 목록 조회
+     * 할일 목록 조회 (from/to 미입력시 오늘 날짜)
      */
     async getTodosRaw(requestParameters: GetTodosRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<BaseResponseListTodoResponse>> {
-        if (requestParameters['from'] == null) {
-            throw new runtime.RequiredError(
-                'from',
-                'Required parameter "from" was null or undefined when calling getTodos().'
-            );
-        }
-
-        if (requestParameters['to'] == null) {
-            throw new runtime.RequiredError(
-                'to',
-                'Required parameter "to" was null or undefined when calling getTodos().'
-            );
-        }
-
         const queryParameters: any = {};
 
         if (requestParameters['from'] != null) {
@@ -179,9 +165,9 @@ export class TodoApi extends runtime.BaseAPI {
     }
 
     /**
-     * 할일 목록 조회
+     * 할일 목록 조회 (from/to 미입력시 오늘 날짜)
      */
-    async getTodos(requestParameters: GetTodosRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BaseResponseListTodoResponse> {
+    async getTodos(requestParameters: GetTodosRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BaseResponseListTodoResponse> {
         const response = await this.getTodosRaw(requestParameters, initOverrides);
         return await response.value();
     }

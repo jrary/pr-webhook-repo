@@ -44,7 +44,7 @@ export default function TodayPage() {
 
   const source = useMemo(
     () => (day ? { todos: day.todos, habits: day.habits, blocks: day.blocks } : EMPTY_DAY),
-    [day],
+    [day]
   )
   const progress = day?.progress ?? progressOf(undefined, EMPTY_DAY)
   const items = useMemo(() => dayPlanItems(source, key), [source, key])
@@ -75,7 +75,11 @@ export default function TodayPage() {
     }
   }
 
-  function schedule(item: { type: PlanItem["type"]; refId: string }, start: number, duration: number) {
+  function schedule(
+    item: { type: PlanItem["type"]; refId: string },
+    start: number,
+    duration: number
+  ) {
     planItem.mutate(
       {
         date: key,
@@ -84,7 +88,7 @@ export default function TodayPage() {
         sourceType: item.type === "todo" ? "TODO" : "HABIT",
         sourceId: Number(item.refId),
       },
-      { onError: (error) => toast.error(error.message) },
+      { onError: (error) => toast.error(error.message) }
     )
   }
 
@@ -179,7 +183,7 @@ export default function TodayPage() {
             onMoveBlock={(id, start, end) =>
               updateBlock.mutate(
                 { blockId: Number(id), body: { planStart: start, planEnd: end } },
-                { onError: (error) => toast.error(error.message) },
+                { onError: (error) => toast.error(error.message) }
               )
             }
             viewOf={(b) => ({

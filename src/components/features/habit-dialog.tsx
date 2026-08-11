@@ -90,7 +90,7 @@ export function HabitDialog({
                   title={c.label}
                   className={cn(
                     "h-8 w-8 rounded-full ring-offset-2 transition-all",
-                    category === c.id && "ring-2 ring-offset-background",
+                    category === c.id && "ring-2 ring-offset-background"
                   )}
                   style={{ backgroundColor: c.color }}
                   aria-label={c.label}

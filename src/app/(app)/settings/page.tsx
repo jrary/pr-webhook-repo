@@ -67,7 +67,7 @@ export default function SettingsPage() {
       {
         onSuccess: () => toast.success("프로필을 저장했어요"),
         onError: (error) => toast.error(error.message),
-      },
+      }
     )
   }
 

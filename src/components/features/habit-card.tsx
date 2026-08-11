@@ -20,13 +20,7 @@ import {
 } from "@/components/ui/dialog"
 
 /** One habit card. `date` is the day its check button records. */
-export function HabitCard({
-  habit,
-  date,
-}: {
-  habit: Habit
-  date: string
-}) {
+export function HabitCard({ habit, date }: { habit: Habit; date: string }) {
   const logHabit = useLogHabitMutation()
   const deleteHabit = useDeleteHabitMutation()
   const category = useCategory(habit.category)
@@ -41,7 +35,7 @@ export function HabitCard({
   function toggle() {
     logHabit.mutate(
       { habitId, date, state: !done },
-      { onError: (error) => toast.error(error.message) },
+      { onError: (error) => toast.error(error.message) }
     )
   }
 
@@ -91,7 +85,7 @@ export function HabitCard({
           className={cn(
             "flex w-full items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all",
             done ? "text-white" : "border-border text-muted-foreground hover:border-primary",
-            toggling && "opacity-60",
+            toggling && "opacity-60"
           )}
           style={done ? { backgroundColor: color, borderColor: color } : undefined}
         >

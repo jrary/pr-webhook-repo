@@ -20,7 +20,12 @@ export function DateNav({
   return (
     <div className={className}>
       <div className="inline-flex items-center gap-1 rounded-lg border bg-card p-1">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onChange(addDays(date, -1))}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => onChange(addDays(date, -1))}
+        >
           <ChevronLeft className="h-4 w-4" />
           <span className="sr-only">이전 날짜</span>
         </Button>
@@ -39,7 +44,12 @@ export function DateNav({
             />
           </PopoverContent>
         </Popover>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onChange(addDays(date, 1))}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => onChange(addDays(date, 1))}
+        >
           <ChevronRight className="h-4 w-4" />
           <span className="sr-only">다음 날짜</span>
         </Button>

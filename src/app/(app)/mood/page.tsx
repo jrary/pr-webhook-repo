@@ -24,7 +24,7 @@ export default function MoodPage() {
         .flat()
         .filter((day) => day.getMonth() === date.getMonth())
         .map(dateKey),
-    [date],
+    [date]
   )
   const moods = useMoodsQuery(monthKeys)
 

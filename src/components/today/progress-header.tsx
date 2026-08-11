@@ -33,7 +33,7 @@ function MetricBar({
       onClick={onClick}
       className={cn(
         "w-full rounded-lg px-3 py-2 text-left transition-colors hover:bg-secondary/60",
-        active && "bg-secondary",
+        active && "bg-secondary"
       )}
     >
       <div className="flex items-baseline justify-between text-sm">

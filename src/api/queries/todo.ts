@@ -1,12 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Todo } from "@/lib/types";
-import { client, unwrap } from "../client";
-import type {
-  CreateTodoRequest,
-  TodoResponse,
-  UpdateTodoRequest,
-} from "../generated";
-import { statsQueryKey, todoQueryKey, type DateRange } from "../query-keys";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import type { Todo } from "@/lib/types"
+import { client, unwrap } from "../client"
+import type { CreateTodoRequest, TodoResponse, UpdateTodoRequest } from "../generated"
+import { statsQueryKey, todoQueryKey, type DateRange } from "../query-keys"
 
 /** 서버 할 일을 화면이 쓰는 `Todo`로. id·카테고리 id는 문자열로 통일한다. */
 export function toTodo(res: TodoResponse): Todo {
@@ -18,7 +14,7 @@ export function toTodo(res: TodoResponse): Todo {
     date: res.date ?? "",
     order: res.orderIndex ?? 0,
     estimateMin: res.estimateMin,
-  };
+  }
 }
 
 /** 할 일 목록 조회 (기간) */
@@ -27,16 +23,16 @@ export function useTodosQuery(range: DateRange) {
     queryKey: todoQueryKey.list(range),
     queryFn: () => unwrap(client.Todo.getTodos(range)),
     select: (data) => data.map(toTodo).sort((a, b) => a.order - b.order),
-  });
+  })
 }
 
 function useTodoInvalidation() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   return () => {
-    queryClient.invalidateQueries({ queryKey: todoQueryKey.all() });
+    queryClient.invalidateQueries({ queryKey: todoQueryKey.all() })
     // 완료율이 함께 바뀌므로 통계도 무효화한다.
-    queryClient.invalidateQueries({ queryKey: statsQueryKey.all() });
-  };
+    queryClient.invalidateQueries({ queryKey: statsQueryKey.all() })
+  }
 }
 
 /**
@@ -44,11 +40,12 @@ function useTodoInvalidation() {
  * @param CreateTodoRequest
  */
 export function useCreateTodoMutation() {
-  const invalidate = useTodoInvalidation();
+  const invalidate = useTodoInvalidation()
   return useMutation({
-    mutationFn: (body: CreateTodoRequest) => unwrap(client.Todo.createTodo({ createTodoRequest: body })),
+    mutationFn: (body: CreateTodoRequest) =>
+      unwrap(client.Todo.createTodo({ createTodoRequest: body })),
     onSuccess: invalidate,
-  });
+  })
 }
 
 /**
@@ -56,12 +53,12 @@ export function useCreateTodoMutation() {
  * @param todoId, UpdateTodoRequest
  */
 export function useUpdateTodoMutation() {
-  const invalidate = useTodoInvalidation();
+  const invalidate = useTodoInvalidation()
   return useMutation({
     mutationFn: ({ todoId, body }: { todoId: number; body: UpdateTodoRequest }) =>
       unwrap(client.Todo.updateTodo({ todoId, updateTodoRequest: body })),
     onSuccess: invalidate,
-  });
+  })
 }
 
 /**
@@ -69,10 +66,9 @@ export function useUpdateTodoMutation() {
  * @param todoId
  */
 export function useDeleteTodoMutation() {
-  const invalidate = useTodoInvalidation();
+  const invalidate = useTodoInvalidation()
   return useMutation({
     mutationFn: (todoId: number) => unwrap(client.Todo.deleteTodo({ todoId })),
     onSuccess: invalidate,
-  });
+  })
 }
-

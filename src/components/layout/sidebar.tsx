@@ -35,13 +35,13 @@ export function Sidebar() {
     <aside
       className={cn(
         "hidden shrink-0 flex-col border-r bg-card transition-[width] duration-200 ease-in-out md:flex",
-        collapsed ? "w-[4.75rem]" : "w-60",
+        collapsed ? "w-[4.75rem]" : "w-60"
       )}
     >
       <div
         className={cn(
           "flex h-16 items-center px-3",
-          collapsed ? "justify-center" : "justify-between pl-6 pr-3",
+          collapsed ? "justify-center" : "justify-between pl-6 pr-3"
         )}
       >
         {!collapsed ? (
@@ -88,7 +88,7 @@ export function Sidebar() {
                 collapsed ? "justify-center px-0" : "px-3",
                 active
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -102,7 +102,7 @@ export function Sidebar() {
         <div
           className={cn(
             "flex items-center gap-3 rounded-lg px-2 py-2",
-            collapsed && "justify-center px-0",
+            collapsed && "justify-center px-0"
           )}
         >
           <Avatar className="h-9 w-9 shrink-0">

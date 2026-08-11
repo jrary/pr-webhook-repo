@@ -23,7 +23,7 @@ export function AddTodo({ date }: { date: string }) {
   const [category, setCategory] = useState<CategoryKey>("")
 
   // stay valid when the selected category is renamed away or deleted
-  const selected = categories.some((c) => c.id === category) ? category : categories[0]?.id ?? ""
+  const selected = categories.some((c) => c.id === category) ? category : (categories[0]?.id ?? "")
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -34,7 +34,7 @@ export function AddTodo({ date }: { date: string }) {
       {
         onSuccess: () => setTitle(""),
         onError: (error) => toast.error(error.message),
-      },
+      }
     )
   }
 

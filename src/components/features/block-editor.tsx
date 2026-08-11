@@ -1,65 +1,58 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { useHabitsQuery } from "@/api/queries/habit";
+import { useEffect, useState } from "react"
+import { Trash2 } from "lucide-react"
+import { toast } from "sonner"
+import { useHabitsQuery } from "@/api/queries/habit"
 import {
   useClearActualMutation,
   useCreateTimeBlockMutation,
   useDeleteTimeBlockMutation,
   useRecordActualMutation,
   useUpdateTimeBlockMutation,
-} from "@/api/queries/time-block";
-import { useTodosQuery } from "@/api/queries/todo";
-import type { ActualInterval, CategoryKey, PlanSource } from "@/lib/types";
-import { useCategories } from "@/hooks/use-categories";
-import { minutesToLabel } from "@/lib/date";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+} from "@/api/queries/time-block"
+import { useTodosQuery } from "@/api/queries/todo"
+import type { ActualInterval, CategoryKey, PlanSource } from "@/lib/types"
+import { useCategories } from "@/hooks/use-categories"
+import { minutesToLabel } from "@/lib/date"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-} from "@/components/ui/popover";
+} from "@/components/ui/select"
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 
 export interface BlockDraft {
-  id?: string;
-  date: string;
-  start: number;
-  end: number;
-  category?: CategoryKey;
-  source?: PlanSource;
-  actual?: ActualInterval;
-  spontaneous?: boolean;
+  id?: string
+  date: string
+  start: number
+  end: number
+  category?: CategoryKey
+  source?: PlanSource
+  actual?: ActualInterval
+  spontaneous?: boolean
   /** viewport point the popover opens next to */
-  anchor?: { x: number; y: number };
+  anchor?: { x: number; y: number }
 }
 
-const STEP = 10;
-const TIME_OPTIONS = Array.from(
-  { length: (24 * 60) / STEP + 1 },
-  (_, i) => i * STEP,
-);
+const STEP = 10
+const TIME_OPTIONS = Array.from({ length: (24 * 60) / STEP + 1 }, (_, i) => i * STEP)
 
-const FREE = "free";
+const FREE = "free"
 
 function sourceValue(source?: PlanSource) {
-  return source ? `${source.type}:${source.refId}` : FREE;
+  return source ? `${source.type}:${source.refId}` : FREE
 }
 
 function parseSourceValue(value: string): PlanSource | undefined {
-  if (value === FREE) return undefined;
-  const [type, refId] = value.split(":");
-  return { type: type as PlanSource["type"], refId };
+  if (value === FREE) return undefined
+  const [type, refId] = value.split(":")
+  return { type: type as PlanSource["type"], refId }
 }
 
 function TimeRange({
@@ -67,17 +60,15 @@ function TimeRange({
   end,
   onChange,
 }: {
-  start: number;
-  end: number;
-  onChange: (start: number, end: number) => void;
+  start: number
+  end: number
+  onChange: (start: number, end: number) => void
 }) {
   return (
     <div className="grid grid-cols-2 gap-2">
       <Select
         value={String(start)}
-        onValueChange={(v) =>
-          onChange(Number(v), Math.max(end, Number(v) + STEP))
-        }
+        onValueChange={(v) => onChange(Number(v), Math.max(end, Number(v) + STEP))}
       >
         <SelectTrigger className="h-8">
           <SelectValue />
@@ -90,10 +81,7 @@ function TimeRange({
           ))}
         </SelectContent>
       </Select>
-      <Select
-        value={String(end)}
-        onValueChange={(v) => onChange(start, Number(v))}
-      >
+      <Select value={String(end)} onValueChange={(v) => onChange(start, Number(v))}>
         <SelectTrigger className="h-8">
           <SelectValue />
         </SelectTrigger>
@@ -106,98 +94,98 @@ function TimeRange({
         </SelectContent>
       </Select>
     </div>
-  );
+  )
 }
 
-export function BlockEditor({
-  draft,
-  onClose,
-}: {
-  draft: BlockDraft | null;
-  onClose: () => void;
-}) {
-  const createBlock = useCreateTimeBlockMutation();
-  const updateBlock = useUpdateTimeBlockMutation();
-  const deleteBlock = useDeleteTimeBlockMutation();
-  const recordActual = useRecordActualMutation();
-  const clearActual = useClearActualMutation();
+export function BlockEditor({ draft, onClose }: { draft: BlockDraft | null; onClose: () => void }) {
+  const createBlock = useCreateTimeBlockMutation()
+  const updateBlock = useUpdateTimeBlockMutation()
+  const deleteBlock = useDeleteTimeBlockMutation()
+  const recordActual = useRecordActualMutation()
+  const clearActual = useClearActualMutation()
 
-  const date = draft?.date ?? "";
-  const { data: dayTodos = [] } = useTodosQuery({ from: date, to: date });
-  const { data: habits = [] } = useHabitsQuery(date || undefined);
-  const categories = useCategories();
+  const date = draft?.date ?? ""
+  const { data: dayTodos = [] } = useTodosQuery({
+    from: date || undefined,
+    to: date || undefined,
+  })
+  const { data: habits = [] } = useHabitsQuery(date || undefined)
+  const categories = useCategories()
 
-  const [category, setCategory] = useState<CategoryKey>("");
-  const [start, setStart] = useState(0);
-  const [end, setEnd] = useState(STEP);
-  const [source, setSource] = useState<string>(FREE);
-  const [actual, setActual] = useState<{ start: number; end: number } | null>(
-    null,
-  );
-  const [unplanned, setUnplanned] = useState(false);
+  const [category, setCategory] = useState<CategoryKey>("")
+  const [start, setStart] = useState(0)
+  const [end, setEnd] = useState(STEP)
+  const [source, setSource] = useState<string>(FREE)
+  const [actual, setActual] = useState<{ start: number; end: number } | null>(null)
+  const [unplanned, setUnplanned] = useState(false)
 
   useEffect(() => {
-    if (!draft) return;
-    setCategory(draft.category ?? categories[0]?.id ?? "");
-    setStart(draft.start);
-    setEnd(draft.end);
-    setSource(sourceValue(draft.source));
-    setUnplanned(draft.spontaneous ?? false);
-    setActual(draft.actual ? { ...draft.actual } : null);
+    if (!draft) return
+    setCategory(draft.category ?? categories[0]?.id ?? "")
+    setStart(draft.start)
+    setEnd(draft.end)
+    setSource(sourceValue(draft.source))
+    setUnplanned(draft.spontaneous ?? false)
+    setActual(draft.actual ? { ...draft.actual } : null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft]);
+  }, [draft])
 
-  const isEdit = Boolean(draft?.id);
+  const isEdit = Boolean(draft?.id)
 
   function handleSourceChange(value: string) {
-    setSource(value);
-    const parsed = parseSourceValue(value);
-    if (!parsed) return;
+    setSource(value)
+    const parsed = parseSourceValue(value)
+    if (!parsed) return
     // adopt the source's category so colours never drift from the item
     if (parsed.type === "todo") {
-      const todo = dayTodos.find((t) => t.id === parsed.refId);
-      if (todo) setCategory(todo.category);
-      return;
+      const todo = dayTodos.find((t) => t.id === parsed.refId)
+      if (todo) setCategory(todo.category)
+      return
     }
-    const habit = habits.find((h) => h.id === parsed.refId);
-    if (habit) setCategory(habit.category);
+    const habit = habits.find((h) => h.id === parsed.refId)
+    if (habit) setCategory(habit.category)
   }
 
   /** Turning "planned" off makes the block its own record: plan span = actual span. */
   function handleUnplannedChange(next: boolean) {
-    setUnplanned(next);
-    if (next) setActual({ start, end });
+    setUnplanned(next)
+    if (next) setActual({ start, end })
   }
 
   /** Blocks show no name of their own, but the server wants one. */
   function titleFor(link: PlanSource | undefined) {
     if (link?.type === "todo") {
-      return dayTodos.find((t) => t.id === link.refId)?.title ?? "할 일";
+      return dayTodos.find((t) => t.id === link.refId)?.title ?? "할 일"
     }
     if (link?.type === "habit") {
-      return habits.find((h) => h.id === link.refId)?.name ?? "습관";
+      return habits.find((h) => h.id === link.refId)?.name ?? "습관"
     }
-    return categories.find((c) => c.id === category)?.label ?? "일정";
+    return categories.find((c) => c.id === category)?.label ?? "일정"
   }
 
   async function save() {
-    if (!draft) return;
-    const s = Math.min(start, end - STEP);
-    const e = Math.max(end, s + STEP);
-    const link = parseSourceValue(source);
-    const finalActual = unplanned ? { start: s, end: e } : actual;
-    const categoryId = category ? Number(category) : undefined;
+    if (!draft) return
+    const s = Math.min(start, end - STEP)
+    const e = Math.max(end, s + STEP)
+    const link = parseSourceValue(source)
+    const finalActual = unplanned ? { start: s, end: e } : actual
+    const categoryId = category ? Number(category) : undefined
 
     try {
-      let blockId: number;
+      let blockId: number
       if (draft.id) {
         // the update endpoint only carries title/category/plan — link and
         // "계획 없이 한 일" are fixed when the block is created
         await updateBlock.mutateAsync({
           blockId: Number(draft.id),
-          body: { title: titleFor(draft.source), categoryId, planStart: s, planEnd: e },
-        });
-        blockId = Number(draft.id);
+          body: {
+            title: titleFor(draft.source),
+            categoryId,
+            planStart: s,
+            planEnd: e,
+          },
+        })
+        blockId = Number(draft.id)
       } else {
         const created = await createBlock.mutateAsync({
           date: draft.date,
@@ -208,33 +196,33 @@ export function BlockEditor({
           sourceType: link ? (link.type.toUpperCase() as "TODO" | "HABIT") : undefined,
           sourceId: link ? Number(link.refId) : undefined,
           spontaneous: unplanned || undefined,
-        });
-        blockId = Number(created.id);
+        })
+        blockId = Number(created.id)
       }
 
       if (finalActual) {
         await recordActual.mutateAsync({
           blockId,
           body: { actualStart: finalActual.start, actualEnd: finalActual.end },
-        });
+        })
       } else if (draft.actual) {
-        await clearActual.mutateAsync(blockId);
+        await clearActual.mutateAsync(blockId)
       }
-      onClose();
+      onClose()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "저장하지 못했습니다.");
+      toast.error(error instanceof Error ? error.message : "저장하지 못했습니다.")
     }
   }
 
   function handleDelete() {
     if (!draft?.id) {
-      onClose();
-      return;
+      onClose()
+      return
     }
     deleteBlock.mutate(Number(draft.id), {
       onSuccess: onClose,
       onError: (error) => toast.error(error.message),
-    });
+    })
   }
 
   // nothing is rendered while closed, so no stray anchor sits at the corner
@@ -289,10 +277,7 @@ export function BlockEditor({
                 {categories.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     <span className="flex items-center gap-2">
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: c.color }}
-                      />
+                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
                       {c.label}
                     </span>
                   </SelectItem>
@@ -307,10 +292,7 @@ export function BlockEditor({
               <Label className="text-xs text-muted-foreground">계획 시간</Label>
               <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
                 계획 없이 한 일
-                <Switch
-                  checked={unplanned}
-                  onCheckedChange={handleUnplannedChange}
-                />
+                <Switch checked={unplanned} onCheckedChange={handleUnplannedChange} />
               </label>
             </div>
             {!unplanned && (
@@ -318,8 +300,8 @@ export function BlockEditor({
                 start={start}
                 end={end}
                 onChange={(s, e) => {
-                  setStart(s);
-                  setEnd(e);
+                  setStart(s)
+                  setEnd(e)
                 }}
               />
             )}
@@ -358,9 +340,9 @@ export function BlockEditor({
                 start={start}
                 end={end}
                 onChange={(s, e) => {
-                  setStart(s);
-                  setEnd(e);
-                  setActual({ start: s, end: e });
+                  setStart(s)
+                  setEnd(e)
+                  setActual({ start: s, end: e })
                 }}
               />
             ) : actual ? (
@@ -395,5 +377,5 @@ export function BlockEditor({
         </div>
       </PopoverContent>
     </Popover>
-  );
+  )
 }

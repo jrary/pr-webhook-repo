@@ -337,7 +337,8 @@ export function TimeBlockGrid({
                   !active && "transition-all",
                   view?.done && "opacity-70",
                   view?.missed && "ring-2 ring-destructive ring-offset-1 ring-offset-background",
-                  focused && "z-[6] scale-[1.01] ring-2 ring-foreground ring-offset-2 ring-offset-background",
+                  focused &&
+                    "z-[6] scale-[1.01] ring-2 ring-foreground ring-offset-2 ring-offset-background"
                 )}
                 style={{ top, height, backgroundColor: meta.color, minHeight: SLOT_H }}
               >
@@ -386,13 +387,11 @@ export function TimeBlockGrid({
                   }
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={() =>
-                    block.actual
-                      ? record.setActual(block.id, null)
-                      : record.markPlanned(block)
+                    block.actual ? record.setActual(block.id, null) : record.markPlanned(block)
                   }
                   className={cn(
                     "absolute right-1.5 z-[7] flex h-5 w-5 items-center justify-center rounded-full border border-white/70 bg-white/20 text-white backdrop-blur-sm transition-colors hover:bg-white/40",
-                    block.actual && "bg-white/90 text-foreground",
+                    block.actual && "bg-white/90 text-foreground"
                   )}
                   style={{ top: top + 3 }}
                 >

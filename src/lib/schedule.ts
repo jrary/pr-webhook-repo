@@ -17,7 +17,7 @@ function ceilToSlot(minutes: number) {
 export function nextFreeSlot(
   blocks: TimeBlock[],
   durationMin: number,
-  fromMin: number,
+  fromMin: number
 ): number | null {
   const sorted = [...blocks].sort((a, b) => a.start - b.start)
   let candidate = ceilToSlot(Math.max(0, fromMin))
@@ -40,7 +40,7 @@ export function defaultPlanStart(
   blocks: TimeBlock[],
   durationMin: number,
   date: Date,
-  now: Date = new Date(),
+  now: Date = new Date()
 ): number | null {
   const isToday = dateKey(date) === dateKey(now)
   const from = isToday ? now.getHours() * 60 + now.getMinutes() : DAY_START

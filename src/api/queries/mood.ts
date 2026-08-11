@@ -1,22 +1,17 @@
-import {
-  useMutation,
-  useQueries,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import type { MoodEntry, MoodScore } from "@/lib/types";
-import { client, unwrap } from "../client";
-import type { MoodResponse, UpsertMoodRequest } from "../generated";
-import { moodQueryKey } from "../query-keys";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query"
+import type { MoodEntry, MoodScore } from "@/lib/types"
+import { client, unwrap } from "../client"
+import type { MoodResponse, UpsertMoodRequest } from "../generated"
+import { moodQueryKey } from "../query-keys"
 
 /** 기록이 없는 날은 서버가 빈 응답을 주므로 `null`로 정규화한다. */
 export function toMood(res: MoodResponse | undefined, date: string): MoodEntry | null {
-  if (res?.score == null) return null;
+  if (res?.score == null) return null
   return {
     date: res.date ?? date,
     score: res.score as MoodScore,
     note: res.note ?? undefined,
-  };
+  }
 }
 
 /**
@@ -28,7 +23,7 @@ export function useMoodQuery(date: string) {
     queryKey: moodQueryKey.detail(date),
     queryFn: () => unwrap(client.Mood.getMood({ date })),
     select: (data) => toMood(data, date),
-  });
+  })
 }
 
 /**
@@ -49,7 +44,7 @@ export function useMoodsQuery(dates: string[]) {
         .filter((entry): entry is MoodEntry => entry != null),
       isPending: results.some((result) => result.isPending),
     }),
-  });
+  })
 }
 
 /**
@@ -57,11 +52,11 @@ export function useMoodsQuery(dates: string[]) {
  * @param date, UpsertMoodRequest
  */
 export function useUpsertMoodMutation() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ date, body }: { date: string; body: UpsertMoodRequest }) =>
       unwrap(client.Mood.upsertMood({ date, upsertMoodRequest: body })),
     onSuccess: (_data, { date }) =>
       queryClient.invalidateQueries({ queryKey: moodQueryKey.detail(date) }),
-  });
+  })
 }

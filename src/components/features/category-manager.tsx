@@ -22,13 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-function ColorPicker({
-  value,
-  onChange,
-}: {
-  value: string
-  onChange: (color: string) => void
-}) {
+function ColorPicker({ value, onChange }: { value: string; onChange: (color: string) => void }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {CATEGORY_COLORS.map((color) => (
@@ -39,7 +33,7 @@ function ColorPicker({
           aria-label={color}
           className={cn(
             "h-6 w-6 rounded-full ring-offset-1 transition-all",
-            value === color && "ring-2 ring-foreground ring-offset-background",
+            value === color && "ring-2 ring-foreground ring-offset-background"
           )}
           style={{ backgroundColor: color }}
         />
@@ -63,7 +57,7 @@ function Row({ category, canDelete }: { category: Category; canDelete: boolean }
       {
         onSuccess: () => setEditing(false),
         onError: (error) => toast.error(error.message),
-      },
+      }
     )
   }
 
@@ -140,7 +134,7 @@ export function CategoryManager() {
       {
         onSuccess: () => setLabel(""),
         onError: (error) => toast.error(error.message),
-      },
+      }
     )
   }
 

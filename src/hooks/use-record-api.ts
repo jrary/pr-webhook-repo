@@ -16,13 +16,16 @@ export function useRecordApi(): RecordApi {
       markPlanned: (block) =>
         recordActual.mutate(
           { blockId: Number(block.id), body: { actualStart: block.start, actualEnd: block.end } },
-          { onError },
+          { onError }
         ),
       setActual: (blockId, actual) =>
         actual
           ? recordActual.mutate(
-              { blockId: Number(blockId), body: { actualStart: actual.start, actualEnd: actual.end } },
-              { onError },
+              {
+                blockId: Number(blockId),
+                body: { actualStart: actual.start, actualEnd: actual.end },
+              },
+              { onError }
             )
           : clearActual.mutate(Number(blockId), { onError }),
     }

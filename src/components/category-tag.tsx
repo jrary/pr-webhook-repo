@@ -16,7 +16,7 @@ export function CategoryTag({
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
-        className,
+        className
       )}
       style={{ backgroundColor: withAlpha(meta.color, 0.12), color: meta.color }}
     >

@@ -50,8 +50,8 @@ export default function StatsPage() {
   const days = useMemo(() => rangeFor(period), [period])
   const dayKeys = useMemo(() => days.map(dateKey), [days])
   const range = useMemo(
-    () => ({ from: dayKeys[0], to: dayKeys[dayKeys.length - 1] }),
-    [dayKeys],
+    () => ({ from: dayKeys[0] ?? undefined, to: dayKeys[dayKeys.length - 1] }),
+    [dayKeys]
   )
 
   const { data: summary, isPending } = useStatsQuery(range)
@@ -68,10 +68,7 @@ export default function StatsPage() {
     const planned = list.filter((b) => !b.spontaneous)
     const executed = planned.filter((b) => b.actual != null)
     const plannedMin = planned.reduce((sum, b) => sum + (b.end - b.start), 0)
-    const executedMin = executed.reduce(
-      (sum, b) => sum + (b.actual!.end - b.actual!.start),
-      0,
-    )
+    const executedMin = executed.reduce((sum, b) => sum + (b.actual!.end - b.actual!.start), 0)
     const spontaneousMin = list
       .filter((b) => b.spontaneous)
       .reduce((sum, b) => sum + ((b.actual?.end ?? b.end) - (b.actual?.start ?? b.start)), 0)
@@ -80,7 +77,7 @@ export default function StatsPage() {
     for (const b of planned) {
       minutesByCategory.set(
         b.category,
-        (minutesByCategory.get(b.category) ?? 0) + (b.end - b.start),
+        (minutesByCategory.get(b.category) ?? 0) + (b.end - b.start)
       )
     }
     const categoryData = categories
@@ -115,16 +112,24 @@ export default function StatsPage() {
         overall: Math.round(summary?.overallByDate?.[dayKeys[i]] ?? 0),
         mood: moods.data[i]?.score ?? null,
       })),
-    [days, dayKeys, summary, moods.data],
+    [days, dayKeys, summary, moods.data]
   )
 
   const correlation = useMemo(() => {
-    const withMood = daily.filter((d) => d.mood !== null) as { overall: number; mood: number }[]
+    const withMood = daily.filter((d) => d.mood !== null) as {
+      overall: number
+      mood: number
+    }[]
     const high = withMood.filter((d) => d.overall >= 70).map((d) => d.mood)
     const low = withMood.filter((d) => d.overall < 70).map((d) => d.mood)
     const avg = (xs: number[]) =>
       xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : null
-    return { highAvg: avg(high), lowAvg: avg(low), highCount: high.length, lowCount: low.length }
+    return {
+      highAvg: avg(high),
+      lowAvg: avg(low),
+      highCount: high.length,
+      lowCount: low.length,
+    }
   }, [daily])
 
   const hasMood = daily.some((d) => d.mood !== null)

@@ -31,7 +31,7 @@ export function MoodCalendar({ month, moods }: { month: Date; moods: MoodEntry[]
               className={cn(
                 "flex aspect-square flex-col items-center justify-center rounded-lg border text-xs",
                 inMonth ? "bg-card" : "bg-transparent opacity-40",
-                isToday && "ring-2 ring-primary",
+                isToday && "ring-2 ring-primary"
               )}
             >
               <span className="text-[10px] text-muted-foreground">{day.getDate()}</span>

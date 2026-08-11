@@ -31,7 +31,7 @@ export function GratitudeForm({ dateKey: key }: { dateKey: string }) {
       {
         onSuccess: () => toast.success("감사 일기를 저장했어요"),
         onError: (error) => toast.error(error.message),
-      },
+      }
     )
   }
 

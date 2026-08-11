@@ -1,12 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Habit } from "@/lib/types";
-import { client, unwrap } from "../client";
-import type {
-  CreateHabitRequest,
-  HabitWithStreakResponse,
-  UpdateHabitRequest,
-} from "../generated";
-import { habitQueryKey, statsQueryKey } from "../query-keys";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import type { Habit } from "@/lib/types"
+import { client, unwrap } from "../client"
+import type { CreateHabitRequest, HabitWithStreakResponse, UpdateHabitRequest } from "../generated"
+import { habitQueryKey, statsQueryKey } from "../query-keys"
 
 /** 서버 습관을 화면이 쓰는 `Habit`로. id·카테고리 id는 문자열로 통일한다. */
 export function toHabit(res: HabitWithStreakResponse): Habit {
@@ -18,7 +14,7 @@ export function toHabit(res: HabitWithStreakResponse): Habit {
     loggedToday: res.loggedToday ?? false,
     currentStreak: res.currentStreak ?? 0,
     longestStreak: res.longestStreak ?? 0,
-  };
+  }
 }
 
 /**
@@ -30,15 +26,15 @@ export function useHabitsQuery(date?: string) {
     queryKey: habitQueryKey.list(date),
     queryFn: () => unwrap(client.Habit.getHabits({ date })),
     select: (data) => data.map(toHabit),
-  });
+  })
 }
 
 function useHabitInvalidation() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   return () => {
-    queryClient.invalidateQueries({ queryKey: habitQueryKey.all() });
-    queryClient.invalidateQueries({ queryKey: statsQueryKey.all() });
-  };
+    queryClient.invalidateQueries({ queryKey: habitQueryKey.all() })
+    queryClient.invalidateQueries({ queryKey: statsQueryKey.all() })
+  }
 }
 
 /**
@@ -46,11 +42,12 @@ function useHabitInvalidation() {
  * @param CreateHabitRequest
  */
 export function useCreateHabitMutation() {
-  const invalidate = useHabitInvalidation();
+  const invalidate = useHabitInvalidation()
   return useMutation({
-    mutationFn: (body: CreateHabitRequest) => unwrap(client.Habit.createHabit({ createHabitRequest: body })),
+    mutationFn: (body: CreateHabitRequest) =>
+      unwrap(client.Habit.createHabit({ createHabitRequest: body })),
     onSuccess: invalidate,
-  });
+  })
 }
 
 /**
@@ -58,12 +55,12 @@ export function useCreateHabitMutation() {
  * @param habitId, UpdateHabitRequest
  */
 export function useUpdateHabitMutation() {
-  const invalidate = useHabitInvalidation();
+  const invalidate = useHabitInvalidation()
   return useMutation({
     mutationFn: ({ habitId, body }: { habitId: number; body: UpdateHabitRequest }) =>
       unwrap(client.Habit.updateHabit({ habitId, updateHabitRequest: body })),
     onSuccess: invalidate,
-  });
+  })
 }
 
 /**
@@ -71,11 +68,11 @@ export function useUpdateHabitMutation() {
  * @param habitId
  */
 export function useDeleteHabitMutation() {
-  const invalidate = useHabitInvalidation();
+  const invalidate = useHabitInvalidation()
   return useMutation({
     mutationFn: (habitId: number) => unwrap(client.Habit.deleteHabit({ habitId })),
     onSuccess: invalidate,
-  });
+  })
 }
 
 /**
@@ -83,17 +80,10 @@ export function useDeleteHabitMutation() {
  * @param habitId, date YYYY-MM-DD, state
  */
 export function useLogHabitMutation() {
-  const invalidate = useHabitInvalidation();
+  const invalidate = useHabitInvalidation()
   return useMutation({
-    mutationFn: ({
-      habitId,
-      date,
-      state,
-    }: {
-      habitId: number;
-      date: string;
-      state: boolean;
-    }) => unwrap(client.Habit.logHabit({ habitId, date, state })),
+    mutationFn: ({ habitId, date, state }: { habitId: number; date: string; state: boolean }) =>
+      unwrap(client.Habit.logHabit({ habitId, date, state })),
     onSuccess: invalidate,
-  });
+  })
 }

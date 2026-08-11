@@ -46,7 +46,7 @@ export function MoodWidget({ dateKey: key }: { dateKey: string }) {
           onChange={(score: MoodScore) =>
             upsertMood.mutate(
               { date: key, body: { score, note: entry?.note } },
-              { onError: (error) => toast.error(error.message) },
+              { onError: (error) => toast.error(error.message) }
             )
           }
         />

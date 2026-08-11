@@ -1,12 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Category } from "@/lib/types";
-import { client, unwrap } from "../client";
-import type {
-  CategoryResponse,
-  CreateCategoryRequest,
-  UpdateCategoryRequest,
-} from "../generated";
-import { categoryQueryKey } from "../query-keys";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import type { Category } from "@/lib/types"
+import { client, unwrap } from "../client"
+import type { CategoryResponse, CreateCategoryRequest, UpdateCategoryRequest } from "../generated"
+import { categoryQueryKey } from "../query-keys"
 
 /** 서버 카테고리를 화면이 쓰는 `Category`로. id는 문자열로 통일한다. */
 function toCategory(res: CategoryResponse): Category {
@@ -14,7 +10,7 @@ function toCategory(res: CategoryResponse): Category {
     id: String(res.id),
     label: res.label ?? "",
     color: res.color ?? "#8a8f98",
-  };
+  }
 }
 
 /** 카테고리 목록 조회 */
@@ -23,7 +19,7 @@ export function useCategoriesQuery() {
     queryKey: categoryQueryKey.list(),
     queryFn: () => unwrap(client.Category.getCategories()),
     select: (data) => data.map(toCategory),
-  });
+  })
 }
 
 /**
@@ -31,12 +27,12 @@ export function useCategoriesQuery() {
  * @param CreateCategoryRequest
  */
 export function useCreateCategoryMutation() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (body: CreateCategoryRequest) =>
       unwrap(client.Category.createCategory({ createCategoryRequest: body })),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: categoryQueryKey.all() }),
-  });
+  })
 }
 
 /**
@@ -44,12 +40,12 @@ export function useCreateCategoryMutation() {
  * @param categoryId, UpdateCategoryRequest
  */
 export function useUpdateCategoryMutation() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ categoryId, body }: { categoryId: number; body: UpdateCategoryRequest }) =>
       unwrap(client.Category.updateCategory({ categoryId, updateCategoryRequest: body })),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: categoryQueryKey.all() }),
-  });
+  })
 }
 
 /**
@@ -57,9 +53,9 @@ export function useUpdateCategoryMutation() {
  * @param categoryId
  */
 export function useDeleteCategoryMutation() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (categoryId: number) => unwrap(client.Category.deleteCategory({ categoryId })),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: categoryQueryKey.all() }),
-  });
+  })
 }

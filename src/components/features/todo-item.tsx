@@ -16,7 +16,7 @@ export function TodoItem({ todo, showDelete = true }: { todo: Todo; showDelete?:
   function toggle() {
     updateTodo.mutate(
       { todoId: Number(todo.id), body: { done: !todo.done } },
-      { onError: (error) => toast.error(error.message) },
+      { onError: (error) => toast.error(error.message) }
     )
   }
 
@@ -28,17 +28,8 @@ export function TodoItem({ todo, showDelete = true }: { todo: Todo; showDelete?:
 
   return (
     <div className="group flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-accent/50">
-      <Checkbox
-        checked={todo.done}
-        disabled={updateTodo.isPending}
-        onCheckedChange={toggle}
-      />
-      <span
-        className={cn(
-          "flex-1 text-sm",
-          todo.done && "text-muted-foreground line-through",
-        )}
-      >
+      <Checkbox checked={todo.done} disabled={updateTodo.isPending} onCheckedChange={toggle} />
+      <span className={cn("flex-1 text-sm", todo.done && "text-muted-foreground line-through")}>
         {todo.title}
       </span>
       <CategoryTag category={todo.category} />

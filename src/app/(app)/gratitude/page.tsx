@@ -21,13 +21,17 @@ export default function GratitudePage() {
 
   const pastKeys = useMemo(
     () => Array.from({ length: PAST_DAYS }, (_, i) => dateKey(addDays(date, -(i + 1)))),
-    [date],
+    [date]
   )
   const past = useGratitudesQuery(pastKeys)
 
   return (
     <div>
-      <PageHeader title="감사 일기" en="Gratitude" description="오늘 감사한 일 세 가지를 기록하세요">
+      <PageHeader
+        title="감사 일기"
+        en="Gratitude"
+        description="오늘 감사한 일 세 가지를 기록하세요"
+      >
         <DateNav date={date} onChange={setDate} />
       </PageHeader>
 

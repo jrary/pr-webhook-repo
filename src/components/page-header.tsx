@@ -20,9 +20,7 @@ export function PageHeader({
             </span>
           ) : null}
         </h1>
-        {description ? (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        ) : null}
+        {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
       </div>
       {children ? <div className="flex items-center gap-2">{children}</div> : null}
     </div>

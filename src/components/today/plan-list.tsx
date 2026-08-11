@@ -87,11 +87,13 @@ function Row({
       onDragEnd={draggable ? onDragEnd : undefined}
       className={cn(
         "flex items-center gap-3 rounded-md px-1 py-1.5 hover:bg-secondary/40",
-        draggable && "cursor-grab active:cursor-grabbing",
+        draggable && "cursor-grab active:cursor-grabbing"
       )}
     >
       <Checkbox checked={item.done} onCheckedChange={() => onToggle(item)} />
-      <span className={cn("flex-1 truncate text-sm", item.done && "text-muted-foreground line-through")}>
+      <span
+        className={cn("flex-1 truncate text-sm", item.done && "text-muted-foreground line-through")}
+      >
         {item.title}
       </span>
       {item.streak ? (
@@ -100,7 +102,9 @@ function Row({
           {item.streak}
         </span>
       ) : null}
-      {item.type === "todo" ? <CategoryTag category={item.category} className="hidden sm:inline-flex" /> : null}
+      {item.type === "todo" ? (
+        <CategoryTag category={item.category} className="hidden sm:inline-flex" />
+      ) : null}
       <LinkBadge item={item} onPlan={onPlan} onFocusBlock={onFocusBlock} />
     </div>
   )

@@ -1,36 +1,31 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useSignupMutation } from "@/api/queries/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { toast } from "sonner"
+import { useSignupMutation } from "@/api/queries/auth"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function SignupPage() {
-  const router = useRouter();
-  const signup = useSignupMutation();
-  const [nickname, setNickname] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter()
+  const signup = useSignupMutation()
+  const [nickname, setNickname] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
 
   function submit(e: React.FormEvent) {
-    e.preventDefault();
+    e.preventDefault()
     signup.mutate(
       { nickname, email, password },
       {
         onSuccess: () => router.replace("/"),
         onError: (error) => toast.error(error.message),
-      },
-    );
+      }
+    )
   }
 
   return (
@@ -41,9 +36,7 @@ export default function SignupPage() {
             <span className="text-lg font-bold">d</span>
           </div>
           <h1 className="text-xl font-bold">d-log 시작하기</h1>
-          <p className="text-sm text-muted-foreground">
-            계정을 만들고 하루를 기록해보세요
-          </p>
+          <p className="text-sm text-muted-foreground">계정을 만들고 하루를 기록해보세요</p>
         </div>
 
         <Card>
@@ -91,20 +84,13 @@ export default function SignupPage() {
                   required
                 />
               </div>
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={signup.isPending}
-              >
+              <Button type="submit" className="w-full" disabled={signup.isPending}>
                 {signup.isPending ? "가입 중..." : "가입하기"}
               </Button>
             </form>
             <p className="mt-4 text-center text-sm text-muted-foreground">
               이미 계정이 있으신가요?{" "}
-              <Link
-                href="/login"
-                className="font-medium text-foreground hover:underline"
-              >
+              <Link href="/login" className="font-medium text-foreground hover:underline">
                 로그인
               </Link>
             </p>
@@ -112,5 +98,5 @@ export default function SignupPage() {
         </Card>
       </div>
     </div>
-  );
+  )
 }

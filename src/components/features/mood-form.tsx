@@ -31,7 +31,7 @@ export function MoodForm({ dateKey: key }: { dateKey: string }) {
       {
         onSuccess: () => toast.success("오늘의 기분을 저장했어요"),
         onError: (error) => toast.error(error.message),
-      },
+      }
     )
   }
 

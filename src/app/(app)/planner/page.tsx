@@ -30,7 +30,7 @@ export default function PlannerPage() {
 
   const source = useMemo(
     () => (day ? { todos: day.todos, habits: day.habits, blocks: day.blocks } : EMPTY_DAY),
-    [day],
+    [day]
   )
 
   return (
@@ -56,13 +56,17 @@ export default function PlannerPage() {
                   done: isBlockDone(b, source),
                   missed: isBlockMissed(b, source, now ?? new Date()),
                   sourceIcon:
-                    b.source?.type === "todo" ? "📌" : b.source?.type === "habit" ? "🔁" : undefined,
+                    b.source?.type === "todo"
+                      ? "📌"
+                      : b.source?.type === "habit"
+                        ? "🔁"
+                        : undefined,
                 })}
                 record={record}
                 onMoveBlock={(id, start, end) =>
                   updateBlock.mutate(
                     { blockId: Number(id), body: { planStart: start, planEnd: end } },
-                    { onError: (error) => toast.error(error.message) },
+                    { onError: (error) => toast.error(error.message) }
                   )
                 }
                 onInteractionStart={() => setDraft(null)}

@@ -27,7 +27,7 @@ export function MoodSelector({
               "flex flex-1 flex-col items-center gap-1.5 rounded-2xl border py-3 transition-all",
               selected
                 ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:bg-accent/40",
+                : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:bg-accent/40"
             )}
             aria-pressed={selected}
             aria-label={mood.label}
@@ -36,7 +36,7 @@ export function MoodSelector({
             <span
               className={cn(
                 "text-xs font-medium",
-                selected ? "text-primary-foreground" : "text-muted-foreground",
+                selected ? "text-primary-foreground" : "text-muted-foreground"
               )}
             >
               {mood.label}
