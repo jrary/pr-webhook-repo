@@ -2,8 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { useHabitsQuery } from "@/api/queries/habit";
+import {
+  useClearActualMutation,
+  useCreateTimeBlockMutation,
+  useDeleteTimeBlockMutation,
+  useRecordActualMutation,
+  useUpdateTimeBlockMutation,
+} from "@/api/queries/time-block";
+import { useTodosQuery } from "@/api/queries/todo";
 import type { ActualInterval, CategoryKey, PlanSource } from "@/lib/types";
-import { useCategories, usePlannerStore } from "@/lib/store";
+import { useCategories } from "@/hooks/use-categories";
 import { minutesToLabel } from "@/lib/date";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -106,12 +116,15 @@ export function BlockEditor({
   draft: BlockDraft | null;
   onClose: () => void;
 }) {
-  const addBlock = usePlannerStore((s) => s.addBlock);
-  const updateBlock = usePlannerStore((s) => s.updateBlock);
-  const removeBlock = usePlannerStore((s) => s.removeBlock);
+  const createBlock = useCreateTimeBlockMutation();
+  const updateBlock = useUpdateTimeBlockMutation();
+  const deleteBlock = useDeleteTimeBlockMutation();
+  const recordActual = useRecordActualMutation();
+  const clearActual = useClearActualMutation();
 
-  const todos = usePlannerStore((s) => s.todos);
-  const habits = usePlannerStore((s) => s.habits);
+  const date = draft?.date ?? "";
+  const { data: dayTodos = [] } = useTodosQuery({ from: date, to: date });
+  const { data: habits = [] } = useHabitsQuery(date || undefined);
   const categories = useCategories();
 
   const [category, setCategory] = useState<CategoryKey>("");
@@ -135,7 +148,6 @@ export function BlockEditor({
   }, [draft]);
 
   const isEdit = Boolean(draft?.id);
-  const dayTodos = todos.filter((t) => t.date === draft?.date);
 
   function handleSourceChange(value: string) {
     setSource(value);
@@ -143,12 +155,12 @@ export function BlockEditor({
     if (!parsed) return;
     // adopt the source's category so colours never drift from the item
     if (parsed.type === "todo") {
-      const todo = todos.find((t) => t.id === parsed.refId);
+      const todo = dayTodos.find((t) => t.id === parsed.refId);
       if (todo) setCategory(todo.category);
       return;
     }
     const habit = habits.find((h) => h.id === parsed.refId);
-    if (habit) setCategory(habit.color);
+    if (habit) setCategory(habit.category);
   }
 
   /** Turning "planned" off makes the block its own record: plan span = actual span. */
@@ -157,29 +169,72 @@ export function BlockEditor({
     if (next) setActual({ start, end });
   }
 
-  function save() {
+  /** Blocks show no name of their own, but the server wants one. */
+  function titleFor(link: PlanSource | undefined) {
+    if (link?.type === "todo") {
+      return dayTodos.find((t) => t.id === link.refId)?.title ?? "할 일";
+    }
+    if (link?.type === "habit") {
+      return habits.find((h) => h.id === link.refId)?.name ?? "습관";
+    }
+    return categories.find((c) => c.id === category)?.label ?? "일정";
+  }
+
+  async function save() {
     if (!draft) return;
     const s = Math.min(start, end - STEP);
     const e = Math.max(end, s + STEP);
-    const finalActual = unplanned
-      ? { start: s, end: e }
-      : (actual ?? undefined);
-    const patch = {
-      category,
-      start: s,
-      end: e,
-      source: parseSourceValue(source),
-      actual: finalActual,
-      spontaneous: unplanned || undefined,
-    };
-    if (draft.id) updateBlock(draft.id, patch);
-    else addBlock({ date: draft.date, ...patch });
-    onClose();
+    const link = parseSourceValue(source);
+    const finalActual = unplanned ? { start: s, end: e } : actual;
+    const categoryId = category ? Number(category) : undefined;
+
+    try {
+      let blockId: number;
+      if (draft.id) {
+        // the update endpoint only carries title/category/plan — link and
+        // "계획 없이 한 일" are fixed when the block is created
+        await updateBlock.mutateAsync({
+          blockId: Number(draft.id),
+          body: { title: titleFor(draft.source), categoryId, planStart: s, planEnd: e },
+        });
+        blockId = Number(draft.id);
+      } else {
+        const created = await createBlock.mutateAsync({
+          date: draft.date,
+          title: titleFor(link),
+          categoryId,
+          planStart: s,
+          planEnd: e,
+          sourceType: link ? (link.type.toUpperCase() as "TODO" | "HABIT") : undefined,
+          sourceId: link ? Number(link.refId) : undefined,
+          spontaneous: unplanned || undefined,
+        });
+        blockId = Number(created.id);
+      }
+
+      if (finalActual) {
+        await recordActual.mutateAsync({
+          blockId,
+          body: { actualStart: finalActual.start, actualEnd: finalActual.end },
+        });
+      } else if (draft.actual) {
+        await clearActual.mutateAsync(blockId);
+      }
+      onClose();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "저장하지 못했습니다.");
+    }
   }
 
   function handleDelete() {
-    if (draft?.id) removeBlock(draft.id);
-    onClose();
+    if (!draft?.id) {
+      onClose();
+      return;
+    }
+    deleteBlock.mutate(Number(draft.id), {
+      onSuccess: onClose,
+      onError: (error) => toast.error(error.message),
+    });
   }
 
   // nothing is rendered while closed, so no stray anchor sits at the corner
@@ -204,7 +259,7 @@ export function BlockEditor({
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">연결</Label>
-            <Select value={source} onValueChange={handleSourceChange}>
+            <Select value={source} onValueChange={handleSourceChange} disabled={isEdit}>
               <SelectTrigger className="h-8">
                 <SelectValue />
               </SelectTrigger>
@@ -217,7 +272,7 @@ export function BlockEditor({
                 ))}
                 {habits.map((h) => (
                   <SelectItem key={h.id} value={`habit:${h.id}`}>
-                    🔁 {h.emoji} {h.name}
+                    🔁 {h.name}
                   </SelectItem>
                 ))}
               </SelectContent>

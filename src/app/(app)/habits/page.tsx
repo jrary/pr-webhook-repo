@@ -1,7 +1,8 @@
 "use client"
 
-import { usePlannerStore } from "@/lib/store"
-import { useMounted } from "@/hooks/use-mounted"
+import { useMemo } from "react"
+import { useHabitsQuery } from "@/api/queries/habit"
+import { dateKey } from "@/lib/utils"
 import { PageHeader } from "@/components/page-header"
 import { AddHabitButton } from "@/components/features/habit-dialog"
 import { HabitCard } from "@/components/features/habit-card"
@@ -9,8 +10,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function HabitsPage() {
-  const mounted = useMounted()
-  const habits = usePlannerStore((s) => s.habits)
+  const today = useMemo(() => dateKey(new Date()), [])
+  const { data, isPending } = useHabitsQuery(today)
+  const habits = data ?? []
 
   return (
     <div>
@@ -18,7 +20,7 @@ export default function HabitsPage() {
         <AddHabitButton />
       </PageHeader>
 
-      {!mounted ? (
+      {isPending ? (
         <div className="grid gap-4 sm:grid-cols-2">
           {[0, 1].map((i) => (
             <Skeleton key={i} className="h-44 w-full" />
@@ -33,7 +35,7 @@ export default function HabitsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {habits.map((habit) => (
-            <HabitCard key={habit.id} habit={habit} />
+            <HabitCard key={habit.id} habit={habit} date={today} />
           ))}
         </div>
       )}

@@ -2,9 +2,15 @@
 
 import { useState } from "react"
 import { Check, Pencil, Plus, Settings2, Trash2, X } from "lucide-react"
+import { toast } from "sonner"
+import {
+  useCreateCategoryMutation,
+  useDeleteCategoryMutation,
+  useUpdateCategoryMutation,
+} from "@/api/queries/category"
 import { CATEGORY_COLORS } from "@/lib/categories"
 import type { Category } from "@/lib/types"
-import { useCategories, usePlannerStore } from "@/lib/store"
+import { useCategories } from "@/hooks/use-categories"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -42,17 +48,9 @@ function ColorPicker({
   )
 }
 
-function Row({
-  category,
-  usageCount,
-  canDelete,
-}: {
-  category: Category
-  usageCount: number
-  canDelete: boolean
-}) {
-  const updateCategory = usePlannerStore((s) => s.updateCategory)
-  const removeCategory = usePlannerStore((s) => s.removeCategory)
+function Row({ category, canDelete }: { category: Category; canDelete: boolean }) {
+  const updateCategory = useUpdateCategoryMutation()
+  const deleteCategory = useDeleteCategoryMutation()
   const [editing, setEditing] = useState(false)
   const [label, setLabel] = useState(category.label)
   const [color, setColor] = useState(category.color)
@@ -60,8 +58,19 @@ function Row({
   function save() {
     const trimmed = label.trim()
     if (!trimmed) return
-    updateCategory(category.id, { label: trimmed, color })
-    setEditing(false)
+    updateCategory.mutate(
+      { categoryId: Number(category.id), body: { label: trimmed, color } },
+      {
+        onSuccess: () => setEditing(false),
+        onError: (error) => toast.error(error.message),
+      },
+    )
+  }
+
+  function remove() {
+    deleteCategory.mutate(Number(category.id), {
+      onError: (error) => toast.error(error.message),
+    })
   }
 
   if (editing) {
@@ -94,7 +103,6 @@ function Row({
     <div className="flex items-center gap-3 rounded-lg border px-3 py-2">
       <span className="h-3.5 w-3.5 rounded-full" style={{ backgroundColor: category.color }} />
       <span className="flex-1 text-sm font-medium">{category.label}</span>
-      <span className="text-xs text-muted-foreground">{usageCount}개 사용</span>
       <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditing(true)}>
         <Pencil className="h-3.5 w-3.5" />
         <span className="sr-only">편집</span>
@@ -103,9 +111,9 @@ function Row({
         size="icon"
         variant="ghost"
         className="h-8 w-8"
-        disabled={!canDelete}
+        disabled={!canDelete || deleteCategory.isPending}
         title={canDelete ? undefined : "마지막 카테고리는 삭제할 수 없습니다"}
-        onClick={() => removeCategory(category.id)}
+        onClick={remove}
       >
         <Trash2 className="h-3.5 w-3.5" />
         <span className="sr-only">삭제</span>
@@ -117,29 +125,23 @@ function Row({
 /** Add / rename / recolor / delete the categories shared by todos, blocks and habits. */
 export function CategoryManager() {
   const categories = useCategories()
-  const todos = usePlannerStore((s) => s.todos)
-  const blocks = usePlannerStore((s) => s.blocks)
-  const habits = usePlannerStore((s) => s.habits)
-  const addCategory = usePlannerStore((s) => s.addCategory)
+  const createCategory = useCreateCategoryMutation()
 
   const [open, setOpen] = useState(false)
   const [label, setLabel] = useState("")
   const [color, setColor] = useState(CATEGORY_COLORS[0])
 
-  function usageOf(id: string) {
-    return (
-      todos.filter((t) => t.category === id).length +
-      blocks.filter((b) => b.category === id).length +
-      habits.filter((h) => h.color === id).length
-    )
-  }
-
   function submit(e: React.FormEvent) {
     e.preventDefault()
     const trimmed = label.trim()
     if (!trimmed) return
-    addCategory({ label: trimmed, color })
-    setLabel("")
+    createCategory.mutate(
+      { label: trimmed, color },
+      {
+        onSuccess: () => setLabel(""),
+        onError: (error) => toast.error(error.message),
+      },
+    )
   }
 
   return (
@@ -157,12 +159,7 @@ export function CategoryManager() {
 
         <div className="max-h-[50vh] space-y-2 overflow-y-auto py-1">
           {categories.map((c) => (
-            <Row
-              key={c.id}
-              category={c}
-              usageCount={usageOf(c.id)}
-              canDelete={categories.length > 1}
-            />
+            <Row key={c.id} category={c} canDelete={categories.length > 1} />
           ))}
         </div>
 

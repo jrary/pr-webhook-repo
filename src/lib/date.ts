@@ -1,7 +1,6 @@
 import { dateKey } from "./utils"
 
 export const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"]
-export const DAY_LABELS_MON = ["월", "화", "수", "목", "금", "토", "일"]
 
 export function addDays(base: Date, days: number) {
   const d = new Date(base)
@@ -40,22 +39,6 @@ export function monthGrid(date: Date): Date[][] {
     weeks.push(row)
   }
   return weeks
-}
-
-/**
- * Current consecutive-day streak ending today (or yesterday if today not yet done).
- * `history` is a list of YYYY-MM-DD keys.
- */
-export function currentStreak(history: string[], today = new Date()): number {
-  const set = new Set(history)
-  let streak = 0
-  // Allow the streak to count even if today is not yet checked.
-  let cursor = set.has(dateKey(today)) ? today : addDays(today, -1)
-  while (set.has(dateKey(cursor))) {
-    streak += 1
-    cursor = addDays(cursor, -1)
-  }
-  return streak
 }
 
 export function isSameDay(a: Date, b: Date) {

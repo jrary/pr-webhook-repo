@@ -1,14 +1,5 @@
 import type { Category, MoodScore } from "./types"
 
-/** Seed categories; users can add/rename/recolor/remove them from the todo page. */
-export const DEFAULT_CATEGORIES: Category[] = [
-  { id: "study", label: "공부", color: "#6f8caf" },
-  { id: "exercise", label: "운동", color: "#7ba05b" },
-  { id: "work", label: "업무", color: "#c39a4c" },
-  { id: "personal", label: "개인", color: "#9a82b5" },
-  { id: "rest", label: "휴식", color: "#c98ba0" },
-]
-
 /** Palette offered when creating or editing a category. */
 export const CATEGORY_COLORS = [
   "#6f8caf",

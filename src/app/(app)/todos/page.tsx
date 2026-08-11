@@ -1,10 +1,10 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useTodosQuery } from "@/api/queries/todo"
 import type { CategoryKey } from "@/lib/types"
-import { useCategories, usePlannerStore } from "@/lib/store"
+import { useCategories } from "@/hooks/use-categories"
 import { dateKey } from "@/lib/utils"
-import { useMounted } from "@/hooks/use-mounted"
 import { PageHeader } from "@/components/page-header"
 import { DateNav } from "@/components/date-nav"
 import { AddTodo } from "@/components/features/add-todo"
@@ -15,20 +15,14 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function TodosPage() {
-  const mounted = useMounted()
   const [date, setDate] = useState(() => new Date())
   const [filter, setFilter] = useState<CategoryKey | "all">("all")
-  const todos = usePlannerStore((s) => s.todos)
   const categories = useCategories()
 
   const key = dateKey(date)
-  const dayTodos = useMemo(
-    () =>
-      todos
-        .filter((t) => t.date === key)
-        .sort((a, b) => a.order - b.order),
-    [todos, key],
-  )
+  const range = useMemo(() => ({ from: key, to: key }), [key])
+  const { data, isPending } = useTodosQuery(range)
+  const dayTodos = data ?? []
   const filtered = filter === "all" ? dayTodos : dayTodos.filter((t) => t.category === filter)
   const doneCount = dayTodos.filter((t) => t.done).length
 
@@ -62,7 +56,7 @@ export default function TodosPage() {
             <CategoryManager />
           </div>
 
-          {!mounted ? (
+          {isPending ? (
             <div className="space-y-2">
               {[0, 1, 2].map((i) => (
                 <Skeleton key={i} className="h-10 w-full" />
@@ -80,7 +74,7 @@ export default function TodosPage() {
             </div>
           )}
 
-          {mounted && dayTodos.length > 0 ? (
+          {!isPending && dayTodos.length > 0 ? (
             <p className="text-right text-xs text-muted-foreground">
               {dayTodos.length}개 중 {doneCount}개 완료
             </p>

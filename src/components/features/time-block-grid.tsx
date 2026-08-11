@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useRef, useState } from "react"
 import { Check } from "lucide-react"
 import { findCategory } from "@/lib/categories"
-import { useCategories } from "@/lib/store"
+import { useCategories } from "@/hooks/use-categories"
 import { DRAG_MIME } from "@/lib/dnd"
 import { effectiveInterval } from "@/lib/progress"
 import type { ActualInterval, TimeBlock } from "@/lib/types"
@@ -57,7 +57,8 @@ function applyGrab(grab: Grab, deltaMin: number): Grab {
 
 /** How the day's execution gets recorded from the grid. */
 export interface RecordApi {
-  markPlanned: (blockId: string) => void
+  /** record the block as having run exactly as planned */
+  markPlanned: (block: TimeBlock) => void
   setActual: (blockId: string, actual: ActualInterval | null) => void
 }
 
@@ -387,7 +388,7 @@ export function TimeBlockGrid({
                   onClick={() =>
                     block.actual
                       ? record.setActual(block.id, null)
-                      : record.markPlanned(block.id)
+                      : record.markPlanned(block)
                   }
                   className={cn(
                     "absolute right-1.5 z-[7] flex h-5 w-5 items-center justify-center rounded-full border border-white/70 bg-white/20 text-white backdrop-blur-sm transition-colors hover:bg-white/40",

@@ -2,8 +2,10 @@
 
 import { useState } from "react"
 import { Plus } from "lucide-react"
+import { toast } from "sonner"
+import { useCreateTodoMutation } from "@/api/queries/todo"
 import type { CategoryKey } from "@/lib/types"
-import { useCategories, usePlannerStore } from "@/lib/store"
+import { useCategories } from "@/hooks/use-categories"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -15,7 +17,7 @@ import {
 } from "@/components/ui/select"
 
 export function AddTodo({ date }: { date: string }) {
-  const addTodo = usePlannerStore((s) => s.addTodo)
+  const createTodo = useCreateTodoMutation()
   const categories = useCategories()
   const [title, setTitle] = useState("")
   const [category, setCategory] = useState<CategoryKey>("")
@@ -27,8 +29,13 @@ export function AddTodo({ date }: { date: string }) {
     e.preventDefault()
     const trimmed = title.trim()
     if (!trimmed || !selected) return
-    addTodo({ title: trimmed, category: selected, date })
-    setTitle("")
+    createTodo.mutate(
+      { date, title: trimmed, categoryId: Number(selected) },
+      {
+        onSuccess: () => setTitle(""),
+        onError: (error) => toast.error(error.message),
+      },
+    )
   }
 
   return (
@@ -55,7 +62,7 @@ export function AddTodo({ date }: { date: string }) {
             ))}
           </SelectContent>
         </Select>
-        <Button type="submit">
+        <Button type="submit" disabled={createTodo.isPending}>
           <Plus className="h-4 w-4" />
           추가
         </Button>

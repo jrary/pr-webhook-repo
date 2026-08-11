@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { usePlannerStore } from "@/lib/store"
+import { useGratitudeQuery, useUpsertGratitudeMutation } from "@/api/queries/gratitude"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 
 export function GratitudeForm({ dateKey: key }: { dateKey: string }) {
-  const gratitude = usePlannerStore((s) => s.gratitude)
-  const setGratitude = usePlannerStore((s) => s.setGratitude)
-  const existing = gratitude.find((g) => g.date === key)
+  const { data: existing } = useGratitudeQuery(key)
+  const upsertGratitude = useUpsertGratitudeMutation()
 
   const [items, setItems] = useState<[string, string, string]>(["", "", ""])
 
@@ -27,8 +26,13 @@ export function GratitudeForm({ dateKey: key }: { dateKey: string }) {
   }
 
   function save() {
-    setGratitude(key, items)
-    toast.success("감사 일기를 저장했어요")
+    upsertGratitude.mutate(
+      { date: key, body: { content1: items[0], content2: items[1], content3: items[2] } },
+      {
+        onSuccess: () => toast.success("감사 일기를 저장했어요"),
+        onError: (error) => toast.error(error.message),
+      },
+    )
   }
 
   return (
@@ -48,7 +52,9 @@ export function GratitudeForm({ dateKey: key }: { dateKey: string }) {
         </div>
       ))}
       <div className="flex justify-end">
-        <Button onClick={save}>저장</Button>
+        <Button onClick={save} disabled={upsertGratitude.isPending}>
+          저장
+        </Button>
       </div>
     </div>
   )

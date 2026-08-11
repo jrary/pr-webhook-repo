@@ -1,7 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { useLogout } from "@/api/queries/auth"
+import { useMeQuery, useUpdateMeMutation } from "@/api/queries/user"
 import { useMounted } from "@/hooks/use-mounted"
 import { PageHeader } from "@/components/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { Skeleton } from "@/components/ui/skeleton"
 
 function SettingRow({
   title,
@@ -32,24 +36,39 @@ function SettingRow({
 }
 
 export default function SettingsPage() {
+  const router = useRouter()
   const mounted = useMounted()
   const [dark, setDark] = useState(false)
   const [reminders, setReminders] = useState(true)
 
+  const { data: me, isPending } = useMeQuery()
+  const updateMe = useUpdateMeMutation()
+  const logout = useLogout()
+  const [nickname, setNickname] = useState("")
+
   useEffect(() => {
     setDark(document.documentElement.classList.contains("dark"))
   }, [])
+
+  useEffect(() => {
+    setNickname(me?.nickname ?? "")
+  }, [me?.nickname])
 
   function toggleDark(value: boolean) {
     setDark(value)
     document.documentElement.classList.toggle("dark", value)
   }
 
-  function resetData() {
-    if (typeof window === "undefined") return
-    window.localStorage.removeItem("d-log-store")
-    toast.success("데이터를 초기화했어요. 새로고침합니다.")
-    setTimeout(() => window.location.reload(), 600)
+  function save() {
+    const trimmed = nickname.trim()
+    if (!trimmed) return
+    updateMe.mutate(
+      { nickname: trimmed },
+      {
+        onSuccess: () => toast.success("프로필을 저장했어요"),
+        onError: (error) => toast.error(error.message),
+      },
+    )
   }
 
   return (
@@ -62,27 +81,41 @@ export default function SettingsPage() {
             <CardTitle>프로필</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-14 w-14">
-                <AvatarFallback className="text-lg">나</AvatarFallback>
-              </Avatar>
-              <Button variant="outline" size="sm">
-                사진 변경
-              </Button>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="name">이름</Label>
-                <Input id="name" defaultValue="나의 플래너" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">이메일</Label>
-                <Input id="email" type="email" defaultValue="shine@softsquared.com" />
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <Button onClick={() => toast.success("프로필을 저장했어요")}>저장</Button>
-            </div>
+            {isPending ? (
+              <Skeleton className="h-32 w-full" />
+            ) : (
+              <>
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-14 w-14">
+                    <AvatarFallback className="text-lg">
+                      {nickname.slice(0, 1) || "나"}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="nickname">이름</Label>
+                    <Input
+                      id="nickname"
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      minLength={2}
+                      maxLength={20}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">이메일</Label>
+                    {/* the server has no email-change endpoint */}
+                    <Input id="email" type="email" value={me?.email ?? ""} disabled />
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={save} disabled={updateMe.isPending}>
+                    저장
+                  </Button>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -102,15 +135,19 @@ export default function SettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>데이터</CardTitle>
+            <CardTitle>계정</CardTitle>
           </CardHeader>
           <CardContent>
-            <SettingRow
-              title="데이터 초기화"
-              description="모든 할 일·습관·기록을 삭제합니다"
-            >
-              <Button variant="outline" className="text-destructive" onClick={resetData}>
-                초기화
+            <SettingRow title="로그아웃" description="이 브라우저에서 로그아웃합니다">
+              <Button
+                variant="outline"
+                className="text-destructive"
+                onClick={() => {
+                  logout()
+                  router.replace("/login")
+                }}
+              >
+                로그아웃
               </Button>
             </SettingRow>
           </CardContent>

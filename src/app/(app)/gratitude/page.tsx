@@ -4,28 +4,26 @@ import { useMemo, useState } from "react"
 import { format } from "date-fns"
 import { ko } from "date-fns/locale"
 import { CalendarDays } from "lucide-react"
-import { usePlannerStore } from "@/lib/store"
+import { useGratitudesQuery } from "@/api/queries/gratitude"
+import { addDays } from "@/lib/date"
 import { dateKey } from "@/lib/utils"
-import { useMounted } from "@/hooks/use-mounted"
 import { PageHeader } from "@/components/page-header"
 import { DateNav } from "@/components/date-nav"
 import { GratitudeForm } from "@/components/features/gratitude-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+
+/** How far back "지난 기록" looks; the server has no range endpoint yet. */
+const PAST_DAYS = 7
 
 export default function GratitudePage() {
-  const mounted = useMounted()
   const [date, setDate] = useState(() => new Date())
-  const gratitude = usePlannerStore((s) => s.gratitude)
   const key = dateKey(date)
 
-  const past = useMemo(
-    () =>
-      [...gratitude]
-        .filter((g) => g.date !== key && g.items.some((i) => i.trim()))
-        .sort((a, b) => (a.date < b.date ? 1 : -1)),
-    [gratitude, key],
+  const pastKeys = useMemo(
+    () => Array.from({ length: PAST_DAYS }, (_, i) => dateKey(addDays(date, -(i + 1)))),
+    [date],
   )
+  const past = useGratitudesQuery(pastKeys)
 
   return (
     <div>
@@ -39,14 +37,14 @@ export default function GratitudePage() {
             <CardTitle>오늘 감사한 일</CardTitle>
           </CardHeader>
           <CardContent>
-            {!mounted ? <Skeleton className="h-40 w-full" /> : <GratitudeForm dateKey={key} />}
+            <GratitudeForm dateKey={key} />
           </CardContent>
         </Card>
 
-        {mounted && past.length > 0 ? (
+        {past.data.length > 0 ? (
           <div className="space-y-3">
-            <h2 className="text-lg font-semibold">지난 기록</h2>
-            {past.map((g) => (
+            <h2 className="text-lg font-semibold">지난 {PAST_DAYS}일 기록</h2>
+            {past.data.map((g) => (
               <Card key={g.date}>
                 <CardContent className="p-5">
                   <div className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">

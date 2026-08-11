@@ -1,6 +1,6 @@
 "use client"
 
-import { useCategory } from "@/lib/store"
+import { useCategory } from "@/hooks/use-categories"
 import type { CategoryKey } from "@/lib/types"
 import { cn, withAlpha } from "@/lib/utils"
 

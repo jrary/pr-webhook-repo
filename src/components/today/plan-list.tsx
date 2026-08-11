@@ -2,9 +2,9 @@
 
 import Link from "next/link"
 import { Clock, Flame, Plus } from "lucide-react"
-import type { PlanItem } from "@/lib/store"
+import type { PlanItem } from "@/lib/plan"
 import { DRAG_MIME, encodePlanItemDrag } from "@/lib/dnd"
-import { currentStreak, minutesToLabel } from "@/lib/date"
+import { minutesToLabel } from "@/lib/date"
 import { cn } from "@/lib/utils"
 import { CategoryTag } from "@/components/category-tag"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -53,7 +53,6 @@ function LinkBadge({
 
 function Row({
   item,
-  streak,
   onToggle,
   onPlan,
   onFocusBlock,
@@ -61,7 +60,6 @@ function Row({
   onDragEnd,
 }: {
   item: PlanItem
-  streak?: number
   onToggle: (item: PlanItem) => void
   onPlan: (item: PlanItem) => void
   onFocusBlock: (blockId: string) => void
@@ -75,7 +73,7 @@ function Row({
     const payload = encodePlanItemDrag({
       type: item.type,
       refId: item.refId,
-      durationMin: item.defaultMin ?? 30,
+      durationMin: item.defaultMin,
     })
     e.dataTransfer.setData(DRAG_MIME, payload)
     e.dataTransfer.setData("text/plain", payload)
@@ -93,14 +91,13 @@ function Row({
       )}
     >
       <Checkbox checked={item.done} onCheckedChange={() => onToggle(item)} />
-      {item.emoji ? <span className="text-base">{item.emoji}</span> : null}
       <span className={cn("flex-1 truncate text-sm", item.done && "text-muted-foreground line-through")}>
         {item.title}
       </span>
-      {streak ? (
+      {item.streak ? (
         <span className="inline-flex shrink-0 items-center gap-0.5 text-xs font-semibold text-orange-500">
           <Flame className="h-3.5 w-3.5" />
-          {streak}
+          {item.streak}
         </span>
       ) : null}
       {item.type === "todo" ? <CategoryTag category={item.category} className="hidden sm:inline-flex" /> : null}
@@ -152,7 +149,6 @@ function Section({
  */
 export function PlanList({
   items,
-  habitHistories,
   filter,
   unplannedCount,
   onToggle,
@@ -162,8 +158,6 @@ export function PlanList({
   onDragEnd,
 }: {
   items: PlanItem[]
-  /** habit id -> history, for the streak flame */
-  habitHistories: Record<string, string[]>
   filter: "todo" | "habit" | null
   unplannedCount: number
   onToggle: (item: PlanItem) => void
@@ -225,7 +219,6 @@ export function PlanList({
               <Row
                 key={item.key}
                 item={item}
-                streak={currentStreak(habitHistories[item.refId] ?? [])}
                 onToggle={onToggle}
                 onPlan={onPlan}
                 onFocusBlock={onFocusBlock}

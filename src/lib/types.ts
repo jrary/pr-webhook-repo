@@ -57,13 +57,13 @@ export interface TimeBlock {
 export interface Habit {
   id: string
   name: string
-  emoji: string
-  color: CategoryKey
-  createdAt: string
-  /** set of YYYY-MM-DD on which the habit was completed */
-  history: string[]
-  /** default block length in minutes; undefined = not schedulable (e.g. drink water) */
-  defaultMin?: number
+  /** css color of its own, falling back to the category colour */
+  color: string
+  category: CategoryKey
+  /** done on the date the list was queried for */
+  loggedToday: boolean
+  currentStreak: number
+  longestStreak: number
 }
 
 export interface MoodEntry {

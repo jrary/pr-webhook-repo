@@ -1,27 +1,34 @@
-import type { Metadata } from "next"
-import { Inter, Lora } from "next/font/google"
-import { Toaster } from "@/components/ui/sonner"
-import "./globals.css"
+import type { Metadata } from "next";
+import { Inter, Lora } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "./providers";
+import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
-const lora = Lora({ subsets: ["latin"], style: ["normal", "italic"], variable: "--font-serif" })
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const lora = Lora({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+});
 
 export const metadata: Metadata = {
-  title: "d-log — 하루를 기록하다",
-  description: "계획하고, 습관을 추적하고, 감사와 무드를 기록하는 개인 플래너",
-}
+  title: "d-log",
+  description: "개인 플래너",
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className={`${inter.variable} ${lora.variable} font-sans antialiased`}>
-        {children}
+      <body
+        className={`${inter.variable} ${lora.variable} font-sans antialiased`}
+      >
+        <Providers>{children}</Providers>
         <Toaster position="top-center" richColors />
       </body>
     </html>
-  )
+  );
 }

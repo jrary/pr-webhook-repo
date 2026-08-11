@@ -1,10 +1,11 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { usePlannerStore } from "@/lib/store"
+import { toast } from "sonner"
+import { useDayQuery } from "@/api/queries/stats"
+import { useUpdateTimeBlockMutation } from "@/api/queries/time-block"
 import { dateKey } from "@/lib/utils"
 import { isBlockDone, isBlockMissed } from "@/lib/progress"
-import { useMounted } from "@/hooks/use-mounted"
 import { useNow } from "@/hooks/use-now"
 import { useRecordApi } from "@/hooks/use-record-api"
 import type { TimeBlock } from "@/lib/types"
@@ -15,20 +16,22 @@ import { BlockEditor, type BlockDraft } from "@/components/features/block-editor
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
+const EMPTY_DAY = { todos: [], habits: [], blocks: [] }
+
 export default function PlannerPage() {
-  const mounted = useMounted()
   const now = useNow()
   const [date, setDate] = useState(() => new Date())
   const [draft, setDraft] = useState<BlockDraft | null>(null)
-  const blocks = usePlannerStore((s) => s.blocks)
-  const todos = usePlannerStore((s) => s.todos)
-  const habits = usePlannerStore((s) => s.habits)
-  const record = useRecordApi()
-  const updateBlock = usePlannerStore((s) => s.updateBlock)
 
   const key = dateKey(date)
-  const dayBlocks = useMemo(() => blocks.filter((b) => b.date === key), [blocks, key])
-  const source = useMemo(() => ({ todos, habits, blocks }), [todos, habits, blocks])
+  const { data: day, isPending } = useDayQuery(key)
+  const record = useRecordApi()
+  const updateBlock = useUpdateTimeBlockMutation()
+
+  const source = useMemo(
+    () => (day ? { todos: day.todos, habits: day.habits, blocks: day.blocks } : EMPTY_DAY),
+    [day],
+  )
 
   return (
     <div>
@@ -42,13 +45,13 @@ export default function PlannerPage() {
 
       <Card>
         <CardContent className="p-4 sm:p-6">
-          {!mounted ? (
+          {isPending ? (
             <Skeleton className="h-[600px] w-full" />
           ) : (
             <div className="max-h-[70vh] overflow-y-auto no-scrollbar">
               <TimeBlockGrid
                 date={date}
-                blocks={dayBlocks}
+                blocks={source.blocks}
                 viewOf={(b) => ({
                   done: isBlockDone(b, source),
                   missed: isBlockMissed(b, source, now ?? new Date()),
@@ -56,7 +59,12 @@ export default function PlannerPage() {
                     b.source?.type === "todo" ? "📌" : b.source?.type === "habit" ? "🔁" : undefined,
                 })}
                 record={record}
-                onMoveBlock={(id, start, end) => updateBlock(id, { start, end })}
+                onMoveBlock={(id, start, end) =>
+                  updateBlock.mutate(
+                    { blockId: Number(id), body: { planStart: start, planEnd: end } },
+                    { onError: (error) => toast.error(error.message) },
+                  )
+                }
                 onInteractionStart={() => setDraft(null)}
                 onCreate={(start, end, anchor) => setDraft({ date: key, start, end, anchor })}
                 onEdit={(b: TimeBlock, anchor) =>

@@ -2,8 +2,10 @@
 
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import { toast } from "sonner"
+import { useGratitudeQuery } from "@/api/queries/gratitude"
+import { useMoodQuery, useUpsertMoodMutation } from "@/api/queries/mood"
 import type { MoodScore } from "@/lib/types"
-import { usePlannerStore } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MoodSelector } from "@/components/mood-selector"
 
@@ -27,9 +29,9 @@ function CardLink({ href }: { href: string }) {
 }
 
 export function MoodWidget({ dateKey: key }: { dateKey: string }) {
-  const moods = usePlannerStore((s) => s.moods)
-  const setMood = usePlannerStore((s) => s.setMood)
-  const entry = moods.find((m) => m.date === key)
+  const { data: entry } = useMoodQuery(key)
+  const upsertMood = useUpsertMoodMutation()
+
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
@@ -41,7 +43,12 @@ export function MoodWidget({ dateKey: key }: { dateKey: string }) {
       <CardContent>
         <MoodSelector
           value={entry?.score}
-          onChange={(score: MoodScore) => setMood(key, score, entry?.note)}
+          onChange={(score: MoodScore) =>
+            upsertMood.mutate(
+              { date: key, body: { score, note: entry?.note } },
+              { onError: (error) => toast.error(error.message) },
+            )
+          }
         />
       </CardContent>
     </Card>
@@ -49,8 +56,7 @@ export function MoodWidget({ dateKey: key }: { dateKey: string }) {
 }
 
 export function GratitudeWidget({ dateKey: key }: { dateKey: string }) {
-  const gratitude = usePlannerStore((s) => s.gratitude)
-  const entry = gratitude.find((g) => g.date === key)
+  const { data: entry } = useGratitudeQuery(key)
   const items = entry?.items.filter((i) => i.trim()) ?? []
 
   return (
